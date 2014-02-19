@@ -1,0 +1,32 @@
+# LZWCompression Makefile
+# Thomas Steinke
+
+CPP = gcc
+CPPFLAGS = -g
+
+CMPFILES = Compress.o SmartAlloc.o LZWCmp.o CodeSet.o
+CLEARFILES = SmartAlloc.o LZWCmp.o CodeSet.o
+
+Compress: $(CMPFILES)
+	$(CPP) $(CPPFLAGS)  $(CMPFILES) -o Compress
+
+debug: $(CMPFILES)
+	$(CPP) $(CPPFLAGS) $(CMPFILES) -o Compress
+
+clear:
+	rm $(CLEARFILES)
+
+%.o: %.c
+	$(CPP) $(CPPFLAGS) -c $< -o $@
+
+LZWCmp.c: LZWCmp.h SmartAlloc.h
+	touch LZWCmp.c
+
+CodeSet.c: CodeSet.h SmartAlloc.h
+	touch CodeSet.c
+
+Compress.c: LZWCmp.h
+	touch Compress.c
+
+SmartAlloc.c: SmartAlloc.h
+	touch SmartAlloc.c

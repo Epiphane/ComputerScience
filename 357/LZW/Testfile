@@ -1,0 +1,6 @@
+Compress -rbcs
+Arguments
+tests/test1.in
+tests/test2.in
+tests/test3.in
+tests/test4.in

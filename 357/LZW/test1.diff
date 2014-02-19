@@ -1,0 +1,18 @@
+
+    <table class="diff" id="difflib_chg_to0__top"
+           cellspacing="0" cellpadding="0" rules="groups" >
+        <colgroup></colgroup> <colgroup></colgroup> <colgroup></colgroup>
+        <colgroup></colgroup> <colgroup></colgroup> <colgroup></colgroup>
+        
+        <tbody>
+            <tr><td class="diff_next"><a href="#difflib_chg_to0__0">f</a></td><td class="diff_header" id="from0_1">1</td><td nowrap="nowrap">t</td><td class="diff_next"><a href="#difflib_chg_to0__0">f</a></td><td class="diff_header" id="to0_1">1</td><td nowrap="nowrap">t</td></tr>
+            <tr><td class="diff_next" id="difflib_chg_to0__0"></td><td class="diff_header" id="from0_2">2</td><td nowrap="nowrap">e</td><td class="diff_next"></td><td class="diff_header" id="to0_2">2</td><td nowrap="nowrap">e</td></tr>
+            <tr><td class="diff_next"></td><td class="diff_header" id="from0_3">3</td><td nowrap="nowrap">s</td><td class="diff_next"></td><td class="diff_header" id="to0_3">3</td><td nowrap="nowrap">s</td></tr>
+            <tr><td class="diff_next"></td><td class="diff_header" id="from0_4">4</td><td nowrap="nowrap">t</td><td class="diff_next"></td><td class="diff_header" id="to0_4">4</td><td nowrap="nowrap">t</td></tr>
+            <tr><td class="diff_next"></td><td class="diff_header" id="from0_5">5</td><td nowrap="nowrap">1</td><td class="diff_next"></td><td class="diff_header" id="to0_5">5</td><td nowrap="nowrap">1</td></tr>
+            <tr><td class="diff_next"></td><td class="diff_header" id="from0_6">6</td><td nowrap="nowrap">.</td><td class="diff_next"></td><td class="diff_header" id="to0_6">6</td><td nowrap="nowrap">.</td></tr>
+            <tr><td class="diff_next"><a href="#difflib_chg_to0__top">t</a></td><td class="diff_header" id="from0_7">7</td><td nowrap="nowrap"><span class="diff_sub">o</span></td><td class="diff_next"><a href="#difflib_chg_to0__top">t</a></td><td class="diff_header" id="to0_7">7</td><td nowrap="nowrap"><span class="diff_add">r</span></td></tr>
+            <tr><td class="diff_next"></td><td class="diff_header" id="from0_8">8</td><td nowrap="nowrap"><span class="diff_sub">u</span></td><td class="diff_next"></td><td class="diff_header" id="to0_8">8</td><td nowrap="nowrap"><span class="diff_add">e</span></td></tr>
+            <tr><td class="diff_next"></td><td class="diff_header" id="from0_9">9</td><td nowrap="nowrap"><span class="diff_sub">t</span></td><td class="diff_next"></td><td class="diff_header" id="to0_9">9</td><td nowrap="nowrap"><span class="diff_add">s</span></td></tr>
+        </tbody>
+    </table>
