@@ -1,0 +1,11 @@
+./a.out BigJim.txt Jim
+longest line: Hey, I'm lookin' for the king of forty-second street
+num chars: 53
+num lines: 48
+total occurrences of word: 6
+line 2; word 4; Forty-second street's got Big Jim Walker
+line 7; word 6; You know they all call Big Jim "boss"
+line 14; word 5; You don't mess around with Jim
+line 17; word 8; He said, I'm lookin' for a man named Jim
+line 30; word 6; And you don't mess around with Jim
+line 41; word 2; When Big Jim hit the floor

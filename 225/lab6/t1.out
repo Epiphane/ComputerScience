@@ -1,0 +1,34 @@
+Welcome to the stack program.
+
+Enter option: What number? Stack: 25 
+
+Enter option: What number? Stack: 25 3 
+
+Enter option: What number? Stack: 25 3 11 
+
+Enter option: Stack: 19 3 b 
+
+Enter option: Stack: 25 3 11 
+
+Enter option: Popped 11
+Stack: 25 3 
+
+Enter option: What number? Stack: 25 3 8 
+
+Enter option: Popped 8
+Stack: 25 3 
+
+Enter option: Stack: 19 3 
+
+Enter option: Popped 3
+Stack: 19 
+
+Enter option: Stack: 25 
+
+Enter option: Popped 25
+Stack: 
+
+Enter option: Underflow!!!
+Stack: 
+
+Enter option: Goodbye!

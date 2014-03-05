@@ -1,0 +1,7 @@
+//Symbol Name		Page Address
+//----------------	------------
+//	EMPTY_KBDR              3501
+//	KBDR                    3508
+//	KBSR                    3507
+//	LOAD_CHAR               3500
+//	SAVE_PC1                3506

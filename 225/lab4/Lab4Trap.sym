@@ -1,0 +1,12 @@
+//Symbol Name		Page Address
+//----------------	------------
+//	DDR                     331B
+//	DSR                     331A
+//	END_ME                  330B
+//	KBDR                    3319
+//	KBSR                    3318
+//	READ_ST                 3304
+//	SAVE_R1                 3316
+//	SAVE_R2                 3317
+//	STRING_ADDR             3315
+//	WRITE                   3311

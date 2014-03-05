@@ -1,0 +1,23 @@
+./a.out BigJim.txt the
+longest line: Hey, I'm lookin' for the king of forty-second street
+num chars: 53
+num lines: 48
+total occurrences of word: 18
+line 6; word 2; And when the bad folks all get together at night
+line 12; word 4; You don't spit into the wind
+line 13; word 3; You don't pull the mask of the old Lone Ranger
+line 13; word 6; You don't pull the mask of the old Lone Ranger
+line 20; word 4; Hey, I'm lookin' for the king of forty-second street
+line 28; word 4; You don't spit into the wind
+line 29; word 3; You don't pull the mask of the old Lone Ranger
+line 29; word 6; You don't pull the mask of the old Lone Ranger
+line 32; word 5; Well a hush fell over the pool room
+line 33; word 6; When Jimmy come boppin' in off the street
+line 34; word 2; And when the cuttin' was done
+line 35; word 0; the only part that wasn't bloody
+line 36; word 1; Was the soles of the big man's feet
+line 36; word 4; Was the soles of the big man's feet
+line 41; word 4; When Big Jim hit the floor
+line 45; word 4; You don't spit into the wind
+line 46; word 3; You don't pull the mask of the old Lone Ranger
+line 46; word 6; You don't pull the mask of the old Lone Ranger

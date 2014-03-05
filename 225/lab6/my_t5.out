@@ -1,0 +1,77 @@
+Welcome to the stack program.
+
+Enter option: Stack: 
+
+Enter option: Stack: 
+
+Enter option: What number? Stack: 1 
+
+Enter option: What number? Stack: 1 2 
+
+Enter option: What number? Stack: 1 2 3 
+
+Enter option: What number? Stack: 1 2 3 4 
+
+Enter option: What number? Stack: 1 2 3 4 5 
+
+Enter option: What number? Stack: 1 2 3 4 5 6 
+
+Enter option: What number? Stack: 1 2 3 4 5 6 7 
+
+Enter option: What number? Stack: 1 2 3 4 5 6 7 8 
+
+Enter option: What number? Stack: 1 2 3 4 5 6 7 8 9 
+
+Enter option: What number? Stack: 1 2 3 4 5 6 7 8 9 a 
+
+Enter option: What number? Overflow!!!
+Stack: 1 2 3 4 5 6 7 8 9 a 
+
+Enter option: What number? Overflow!!!
+Stack: 1 2 3 4 5 6 7 8 9 a 
+
+Enter option: Stack: 1 2 3 4 5 6 7 8 9 10 
+
+Enter option: Stack: 1 2 3 4 5 6 7 8 9 a 
+
+Enter option: Popped 10
+Stack: 1 2 3 4 5 6 7 8 9 
+
+Enter option: Popped 9
+Stack: 1 2 3 4 5 6 7 8 
+
+Enter option: Popped 8
+Stack: 1 2 3 4 5 6 7 
+
+Enter option: Popped 7
+Stack: 1 2 3 4 5 6 
+
+Enter option: Popped 6
+Stack: 1 2 3 4 5 
+
+Enter option: Popped 5
+Stack: 1 2 3 4 
+
+Enter option: Popped 4
+Stack: 1 2 3 
+
+Enter option: Popped 3
+Stack: 1 2 
+
+Enter option: Popped 2
+Stack: 1 
+
+Enter option: Popped 1
+Stack: 
+
+Enter option: Underflow!!!
+Stack: 
+
+Enter option: Underflow!!!
+Stack: 
+
+Enter option: Stack: 
+
+Enter option: Stack: 
+
+Enter option: Goodbye!

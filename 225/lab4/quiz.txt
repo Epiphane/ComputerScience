@@ -1,0 +1,19 @@
+
+
+Question 1: Which is the superior whiskey?
+   1 - Jim Beam (3)
+   2 - Jack Daniels (10)
+   3 - Fireball Cinnamon Whiskey (8)
+   4 - Diet Coke (0)
+   
+Question 2: What's the best mixed drink?
+   1 - Jägerbomb (7)
+   2 - Long Island Iced Tea (8)
+   3 - Whiskey Sour (10)
+   4 - White Russian (6)
+   
+Question 3: What's the optimal number of drinks to drink before programming?
+   1 - 3 (4)
+   2 - 4 (6)
+   3 - 5 (10)
+   4 - 6 (7)
