@@ -4,7 +4,7 @@
 CPP = gcc
 CPPFLAGS = -g -O3
 
-CMPFILES = Calculon.o RunSuite.o 
+CMPFILES = Calculon.o RunSuite.o Parse.o Array.o
 
 Calculon: $(CMPFILES)
 	$(CPP) $(CPPFLAGS) $(CMPFILES) -o Calculon

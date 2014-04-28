@@ -222,10 +222,15 @@ do
 
                echo $FILE-O$op
 
-               # Compute output and cut it to be two lines:
+               # Pi code
+               #rpistat $FILE-O$op
+               #OUTPUT=$(cat rpistat.txt | grep -E 'Cycles|Instruction' | sed 's/.*: \([0-9]*\).*/\1/')
+               
+               # x86_64 code
+               OUTPUT=$(perf stat $FILE-O$op 2>&1 /dev/null | grep -E '[0-9] cycles|instruction' | sed 's/[\t ]*\([0-9,]*\).*/\1/')
+               
                # (# cycles)
                # (# instructions)
-               OUTPUT=$(perf stat $FILE-O$op 2>&1 /dev/null | grep -E '[0-9] cycles|instruction' | sed 's/[\t ]*\([0-9,]*\).*/\1/')
                CYCLES=$(echo $OUTPUT | cut -f1 -d\ | sed 's/,//g')
                INSNS=$(echo $OUTPUT | cut -f2 -d\ | sed 's/,//g')
                RUNTIME=$((time $FILE-O$op) 2>&1 | grep real | sed -e 's/.*0m\([.0-9]*\)s/\1/' )
