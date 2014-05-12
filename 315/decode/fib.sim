@@ -1,0 +1,37 @@
+ARM Decoding Lab
+Thomas Steinke & Elliot Fiske
+
+PC 0x000083ec
+INSTRUCTION MEMORY
+0x000083ec 0x0000b580:        push { lr, r7 }
+0x000083ee 0x0000b084:        sub sp, sp, #16
+0x000083f0 0x0000af00:        add r7, sp, #0
+0x000083f2 0x00002300:        mov r3, #0
+0x000083f4 0x000060fb:        str r3, [r7, #12]
+0x000083f6 0x00002301:        mov r3, #1
+0x000083f8 0x000060bb:        str r3, [r7, #8]
+0x000083fa 0x00002300:        mov r3, #0
+0x000083fc 0x0000607b:        str r3, [r7, #4]
+0x000083fe 0x00002300:        mov r3, #0
+0x00008400 0x0000603b: loop:  str r3, [r7]
+0x00008402 0x0000e00a:        b skip
+0x00008404 0x000068fa:        ldr r2, [r7, #12]
+0x00008406 0x000068bb:        ldr r3, [r7, #8]
+0x00008408 0x000018d3:        add r3, r2, r3
+0x0000840a 0x0000607b:        str r3, [r7, #4]
+0x0000840c 0x000068bb:        ldr r3, [r7, #8]
+0x0000840e 0x000060fb:        str r3, [r7, #12]
+0x00008410 0x0000687b:        ldr r3, [r7, #4]
+0x00008412 0x000060bb:        str r3, [r7, #8]
+0x00008414 0x0000683b:        ldr r3, [r7]
+0x00008416 0x00003301: skip:  adds r3, #1
+0x00008418 0x0000603b:        str r3, [r7]
+0x0000841a 0x0000683b:        ldr r3, [r7]
+0x0000841c 0x00002b09:        cmp r3, #9
+0x0000841e 0x0000ddf1:        ble loop
+0x00008420 0x0000687b:        ldr r3, [r7, #4]
+0x00008422 0x00001c18:        add r0, r3, #0
+0x00008424 0x000046bd:        mov r5, r7
+0x00008426 0x0000b004:        add sp, sp, #16
+0x00008428 0x0000bd80:        pop { pc, r7 }
+0x0000842a 0x000046c0:        mov r8, r0

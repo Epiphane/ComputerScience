@@ -1,0 +1,300 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ADD_SP8I_TYPE	decode.hpp	53;"	d
+ADD_SP_Instr	decode.hpp	/^struct ADD_SP_Instr {$/;"	s	struct:LDRL_Instr
+ADD_SP_TYPE	decode.hpp	33;"	d
+ADD_SP_Type	decode.hpp	/^struct ADD_SP_Type {$/;"	s	struct:LDRL_Instr
+ALL_Types	decode.hpp	/^      ALL_Types() {}$/;"	f	class:LDRL_Instr::ALL_Types
+ALL_Types	decode.hpp	/^      ALL_Types(const unsigned int & _type) {type.mem = _type;}$/;"	f	class:LDRL_Instr::ALL_Types
+ALL_Types	decode.hpp	/^class ALL_Types{ $/;"	c	struct:LDRL_Instr
+ALU_ADD3I_Instr	decode.hpp	/^struct ALU_ADD3I_Instr {$/;"	s
+ALU_ADD3I_OP	decode.hpp	39;"	d
+ALU_ADD8I_Instr	decode.hpp	/^struct ALU_ADD8I_Instr {$/;"	s
+ALU_ADD8I_OP	decode.hpp	43;"	d
+ALU_ADDR_Instr	decode.hpp	/^struct ALU_ADDR_Instr {$/;"	s
+ALU_ADDR_OP	decode.hpp	37;"	d
+ALU_ASRI_Instr	decode.hpp	/^typedef ALU_LSLI_Instr ALU_ASRI_Instr;$/;"	t
+ALU_ASRI_OP	decode.hpp	36;"	d
+ALU_CMP8I_Instr	decode.hpp	/^typedef ALU_ADD8I_Instr ALU_CMP8I_Instr;$/;"	t
+ALU_CMP_OP	decode.hpp	42;"	d
+ALU_LSLI_Instr	decode.hpp	/^struct ALU_LSLI_Instr {$/;"	s
+ALU_LSLI_OP	decode.hpp	34;"	d
+ALU_LSRI_Instr	decode.hpp	/^typedef ALU_LSLI_Instr ALU_LSRI_Instr;$/;"	t
+ALU_LSRI_OP	decode.hpp	35;"	d
+ALU_MOV8I_Instr	decode.hpp	/^typedef ALU_ADD8I_Instr ALU_MOV8I_Instr;$/;"	t
+ALU_MOV_OP	decode.hpp	41;"	d
+ALU_SUB3I_Instr	decode.hpp	/^typedef ALU_ADD3I_Instr ALU_SUB3I_Instr;$/;"	t
+ALU_SUB3I_OP	decode.hpp	40;"	d
+ALU_SUB8I_Instr	decode.hpp	/^typedef ALU_ADD8I_Instr ALU_SUB8I_Instr;$/;"	t
+ALU_SUB8I_OP	decode.hpp	44;"	d
+ALU_SUBR_Instr	decode.hpp	/^typedef ALU_ADDR_Instr ALU_SUBR_Instr;$/;"	t
+ALU_SUBR_OP	decode.hpp	38;"	d
+ALU_TYPE	decode.hpp	14;"	d
+ALU_Type	decode.hpp	/^struct ALU_Type {$/;"	s
+COND_B_Instr	decode.hpp	/^struct COND_B_Instr {$/;"	s
+COND_TYPE	decode.hpp	49;"	d
+COND_Type	decode.hpp	/^struct COND_Type {$/;"	s
+DP_Instr	decode.hpp	/^      } DP_Instr;$/;"	m	union:DP_Type::__anon3	typeref:struct:DP_Type::__anon3::__anon5
+DP_TYPE	decode.hpp	16;"	d
+DP_Type	decode.hpp	/^struct DP_Type {$/;"	s
+Data32	decode.hpp	/^  Data32(const unsigned char & d0, $/;"	f	class:LDRL_Instr::Data32
+Data32	decode.hpp	/^  Data32(const unsigned int & _d) {d._uint = _d; }$/;"	f	class:LDRL_Instr::Data32
+Data32	decode.hpp	/^class Data32 {$/;"	c	struct:LDRL_Instr
+LDM_Instr	decode.hpp	/^struct LDM_Instr {$/;"	s	struct:LDRL_Instr
+LDM_TYPE	decode.hpp	46;"	d
+LDM_Type	decode.hpp	/^struct LDM_Type {$/;"	s	struct:LDRL_Instr
+LDRL_Instr	decode.hpp	/^struct LDRL_Instr {$/;"	s
+LDRL_TYPE	decode.hpp	48;"	d
+LDRL_Type	decode.hpp	/^struct LDRL_Type {$/;"	s	struct:LDRL_Instr
+LD_ST_IMMB_OPA	decode.hpp	27;"	d
+LD_ST_IMMH_OPA	decode.hpp	28;"	d
+LD_ST_IMMSP_OPA	decode.hpp	29;"	d
+LD_ST_IMM_OPA	decode.hpp	26;"	d
+LD_ST_LD	decode.hpp	31;"	d
+LD_ST_OPB_LDR	decode.hpp	22;"	d
+LD_ST_OPB_LDRB	decode.hpp	24;"	d
+LD_ST_OPB_LDRH	decode.hpp	23;"	d
+LD_ST_OPB_LDRSB	decode.hpp	21;"	d
+LD_ST_OPB_LDRSH	decode.hpp	25;"	d
+LD_ST_OPB_STR	decode.hpp	18;"	d
+LD_ST_OPB_STRB	decode.hpp	20;"	d
+LD_ST_OPB_STRH	decode.hpp	19;"	d
+LD_ST_REG_OPA	decode.hpp	17;"	d
+LD_ST_ST	decode.hpp	30;"	d
+LD_ST_Type	decode.hpp	/^struct LD_ST_Type {$/;"	s
+MISC_ADD_Instr	decode.hpp	/^struct MISC_ADD_Instr {$/;"	s
+MISC_BKPT_Instr	decode.hpp	/^struct MISC_BKPT_Instr {$/;"	s
+MISC_POP_Instr	decode.hpp	/^typedef MISC_PUSH_Instr MISC_POP_Instr;$/;"	t
+MISC_POP_OP	decode.hpp	52;"	d
+MISC_PUSH_Instr	decode.hpp	/^struct MISC_PUSH_Instr {$/;"	s
+MISC_PUSH_OP	decode.hpp	50;"	d
+MISC_REV16_Instr	decode.hpp	/^typedef MISC_SXTH_Instr MISC_REV16_Instr;$/;"	t
+MISC_REVSH_Instr	decode.hpp	/^typedef MISC_SXTH_Instr MISC_REVSH_Instr;$/;"	t
+MISC_REV_Instr	decode.hpp	/^typedef MISC_SXTH_Instr MISC_REV_Instr;$/;"	t
+MISC_SUB_Instr	decode.hpp	/^typedef MISC_ADD_Instr MISC_SUB_Instr;$/;"	t
+MISC_SUB_OP	decode.hpp	51;"	d
+MISC_SXTB_Instr	decode.hpp	/^typedef MISC_SXTH_Instr MISC_SXTB_Instr;$/;"	t
+MISC_SXTH_Instr	decode.hpp	/^struct MISC_SXTH_Instr {$/;"	s
+MISC_TYPE	decode.hpp	45;"	d
+MISC_Type	decode.hpp	/^struct MISC_Type {$/;"	s
+MISC_UXTB_Instr	decode.hpp	/^typedef MISC_SXTH_Instr MISC_UXTB_Instr;$/;"	t
+MISC_UXTH_Instr	decode.hpp	/^typedef MISC_SXTH_Instr MISC_UXTH_Instr;$/;"	t
+Options	decode.hpp	/^  Options() : program(false), dump(false), instrs(false), writes(false),$/;"	f	class:LDRL_Instr::Options
+Options	decode.hpp	/^class Options {$/;"	c	struct:LDRL_Instr
+Register	decode.hpp	/^  Register() : d(0) {}$/;"	f	class:LDRL_Instr::Register
+Register	decode.hpp	/^  Register(Data32 _d) : d(_d) {}$/;"	f	class:LDRL_Instr::Register
+Register	decode.hpp	/^class Register {$/;"	c	struct:LDRL_Instr
+SP_ADD_Instr	decode.hpp	/^struct SP_ADD_Instr {$/;"	s
+SP_BLX_Instr	decode.hpp	/^typedef SP_BX_Instr SP_BLX_Instr;$/;"	t
+SP_BX_Instr	decode.hpp	/^struct SP_BX_Instr {$/;"	s
+SP_CMP_Instr	decode.hpp	/^typedef SP_ADD_Instr SP_CMP_Instr;$/;"	t
+SP_MOV_Instr	decode.hpp	/^typedef SP_ADD_Instr SP_MOV_Instr;$/;"	t
+SP_TYPE	decode.hpp	15;"	d
+SP_Type	decode.hpp	/^struct SP_Type {$/;"	s
+STM_Instr	decode.hpp	/^struct STM_Instr {$/;"	s	struct:LDRL_Instr
+STM_TYPE	decode.hpp	47;"	d
+STM_Type	decode.hpp	/^struct STM_Type {$/;"	s	struct:LDRL_Instr
+UNCOND_B_Instr	decode.hpp	/^struct UNCOND_B_Instr {$/;"	s	struct:LDRL_Instr
+UNCOND_TYPE	decode.hpp	32;"	d
+UNCOND_Type	decode.hpp	/^struct UNCOND_Type {$/;"	s	struct:LDRL_Instr
+_DECODE_H_	decode.hpp	2;"	d
+_int	decode.hpp	/^    int _int;$/;"	m	union:LDRL_Instr::Data32::__anon27
+_ubyte4	decode.hpp	/^    unsigned char _ubyte4[4];$/;"	m	union:LDRL_Instr::Data32::__anon27
+_uint	decode.hpp	/^    unsigned int _uint;$/;"	m	union:LDRL_Instr::Data32::__anon27
+add	decode.hpp	/^      ADD_SP_Instr add;$/;"	m	union:LDRL_Instr::ADD_SP_Type::__anon24
+add	decode.hpp	/^      MISC_ADD_Instr add;$/;"	m	union:MISC_Type::__anon12
+add	decode.hpp	/^      SP_ADD_Instr add;$/;"	m	union:SP_Type::__anon6
+add3i	decode.hpp	/^      ALU_ADD3I_Instr add3i;$/;"	m	union:ALU_Type::__anon1
+add8i	decode.hpp	/^      ALU_ADD8I_Instr add8i;$/;"	m	union:ALU_Type::__anon1
+addr	decode.hpp	/^      ALU_ADDR_Instr addr;$/;"	m	union:ALU_Type::__anon1
+addsp	decode.hpp	/^         ADD_SP_Type addsp;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+alu	decode.hpp	/^         ALU_Type alu;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+asri	decode.hpp	/^      ALU_ASRI_Instr asri;$/;"	m	union:ALU_Type::__anon1
+b	decode.hpp	/^      COND_B_Instr b;$/;"	m	union:COND_Type::__anon14
+b	decode.hpp	/^      UNCOND_B_Instr b;$/;"	m	union:LDRL_Instr::UNCOND_Type::__anon22
+bkpt	decode.hpp	/^      MISC_BKPT_Instr bkpt;$/;"	m	union:MISC_Type::__anon12
+blx	decode.hpp	/^      SP_BLX_Instr blx;$/;"	m	union:SP_Type::__anon6
+bx	decode.hpp	/^      SP_BX_Instr bx;$/;"	m	union:SP_Type::__anon6
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:ALU_Type::__anon1	typeref:struct:ALU_Type::__anon1::__anon2
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:COND_Type::__anon14	typeref:struct:COND_Type::__anon14::__anon15
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:DP_Type::__anon3	typeref:struct:DP_Type::__anon3::__anon4
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:LDRL_Instr::ADD_SP_Type::__anon24	typeref:struct:LDRL_Instr::ADD_SP_Type::__anon24::__anon25
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:LDRL_Instr::LDM_Type::__anon20	typeref:struct:LDRL_Instr::LDM_Type::__anon20::__anon21
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:LDRL_Instr::LDRL_Type::__anon16	typeref:struct:LDRL_Instr::LDRL_Type::__anon16::__anon17
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:LDRL_Instr::STM_Type::__anon18	typeref:struct:LDRL_Instr::STM_Type::__anon18::__anon19
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:LDRL_Instr::UNCOND_Type::__anon22	typeref:struct:LDRL_Instr::UNCOND_Type::__anon22::__anon23
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:LD_ST_Type::__anon8	typeref:struct:LD_ST_Type::__anon8::__anon9
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:MISC_Type::__anon12	typeref:struct:MISC_Type::__anon12::__anon13
+class_type	decode.hpp	/^      } class_type;$/;"	m	union:SP_Type::__anon6	typeref:struct:SP_Type::__anon6::__anon7
+classify_type	decode.cc	/^int classify_type(const ALL_Types data) {$/;"	f
+cmp	decode.hpp	/^      ALU_CMP8I_Instr cmp;$/;"	m	union:ALU_Type::__anon1
+cmp	decode.hpp	/^      SP_CMP_Instr cmp;$/;"	m	union:SP_Type::__anon6
+cond	decode.hpp	/^         COND_Type cond;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+cond	decode.hpp	/^   unsigned int cond: 4;$/;"	m	struct:COND_B_Instr
+d	decode.hpp	/^  Data32 d;$/;"	m	class:LDRL_Instr::Register
+d	decode.hpp	/^  } d;$/;"	m	class:LDRL_Instr::Data32	typeref:union:LDRL_Instr::Data32::__anon27
+data	decode.hpp	/^         unsigned int data: 10;$/;"	m	struct:DP_Type::__anon3::__anon4
+data	decode.hpp	/^         unsigned int data: 10;$/;"	m	struct:SP_Type::__anon6::__anon7
+data	decode.hpp	/^         unsigned int data: 11;$/;"	m	struct:LDRL_Instr::ADD_SP_Type::__anon24::__anon25
+data	decode.hpp	/^         unsigned int data: 11;$/;"	m	struct:LDRL_Instr::LDM_Type::__anon20::__anon21
+data	decode.hpp	/^         unsigned int data: 11;$/;"	m	struct:LDRL_Instr::LDRL_Type::__anon16::__anon17
+data	decode.hpp	/^         unsigned int data: 11;$/;"	m	struct:LDRL_Instr::STM_Type::__anon18::__anon19
+data	decode.hpp	/^         unsigned int data: 11;$/;"	m	struct:LDRL_Instr::UNCOND_Type::__anon22::__anon23
+data	decode.hpp	/^         unsigned int data: 12;$/;"	m	struct:COND_Type::__anon14::__anon15
+data	decode.hpp	/^         unsigned int data: 12;$/;"	m	struct:MISC_Type::__anon12::__anon13
+data	decode.hpp	/^         unsigned int data: 14;$/;"	m	struct:ALU_Type::__anon1::__anon2
+data	decode.hpp	/^         unsigned int data: 9;$/;"	m	struct:LD_ST_Type::__anon8::__anon9
+data_int	decode.hpp	/^  inline int data_int(void) const {$/;"	f	class:LDRL_Instr::Data32
+data_ubyte4	decode.hpp	/^  inline unsigned char data_ubyte4(int i) const {$/;"	f	class:LDRL_Instr::Data32
+data_uint	decode.hpp	/^  inline unsigned int data_uint(void) const {$/;"	f	class:LDRL_Instr::Data32
+derp	decode.hpp	/^   unsigned int derp: 3;$/;"	m	struct:SP_BX_Instr
+dp	decode.hpp	/^         DP_Type dp;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+dump	decode.hpp	/^  bool dump;$/;"	m	class:LDRL_Instr::Options
+getNextValidInstr	decode.cc	/^unsigned int getNextValidInstr(ifstream & in) {$/;"	f
+getPCData	decode.cc	/^unsigned int getPCData(ifstream & in, unsigned int pc) {$/;"	f
+imm	decode.hpp	/^         unsigned int imm: 5;$/;"	m	struct:LD_ST_Type::__anon8::__anon11
+imm	decode.hpp	/^   unsigned int imm: 5;$/;"	m	struct:ALU_LSLI_Instr
+imm	decode.hpp	/^   unsigned int imm: 7;$/;"	m	struct:MISC_ADD_Instr
+imm	decode.hpp	/^   unsigned int imm: 8;$/;"	m	struct:ALU_ADD8I_Instr
+imm	decode.hpp	/^   unsigned int imm: 8;$/;"	m	struct:COND_B_Instr
+imm	decode.hpp	/^   unsigned int imm: 8;$/;"	m	struct:MISC_BKPT_Instr
+instr	decode.hpp	/^   } instr; $/;"	m	struct:DP_Type	typeref:union:DP_Type::__anon3
+instr	decode.hpp	/^   } instr; $/;"	m	struct:LDRL_Instr::ADD_SP_Type	typeref:union:LDRL_Instr::ADD_SP_Type::__anon24
+instr	decode.hpp	/^   } instr;$/;"	m	struct:ALU_Type	typeref:union:ALU_Type::__anon1
+instr	decode.hpp	/^   } instr;$/;"	m	struct:COND_Type	typeref:union:COND_Type::__anon14
+instr	decode.hpp	/^   } instr;$/;"	m	struct:LDRL_Instr::LDM_Type	typeref:union:LDRL_Instr::LDM_Type::__anon20
+instr	decode.hpp	/^   } instr;$/;"	m	struct:LDRL_Instr::LDRL_Type	typeref:union:LDRL_Instr::LDRL_Type::__anon16
+instr	decode.hpp	/^   } instr;$/;"	m	struct:LDRL_Instr::STM_Type	typeref:union:LDRL_Instr::STM_Type::__anon18
+instr	decode.hpp	/^   } instr;$/;"	m	struct:LDRL_Instr::UNCOND_Type	typeref:union:LDRL_Instr::UNCOND_Type::__anon22
+instr	decode.hpp	/^   } instr;$/;"	m	struct:LD_ST_Type	typeref:union:LD_ST_Type::__anon8
+instr	decode.hpp	/^   } instr;$/;"	m	struct:MISC_Type	typeref:union:MISC_Type::__anon12
+instr	decode.hpp	/^   } instr;$/;"	m	struct:SP_Type	typeref:union:SP_Type::__anon6
+instrs	decode.hpp	/^  bool instrs;$/;"	m	class:LDRL_Instr::Options
+ld_st	decode.hpp	/^         LD_ST_Type ld_st;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+ld_st_imm	decode.hpp	/^      } ld_st_imm;$/;"	m	union:LD_ST_Type::__anon8	typeref:struct:LD_ST_Type::__anon8::__anon11
+ld_st_reg	decode.hpp	/^      } ld_st_reg;$/;"	m	union:LD_ST_Type::__anon8	typeref:struct:LD_ST_Type::__anon8::__anon10
+ldm	decode.hpp	/^         LDM_Type ldm;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+ldm	decode.hpp	/^      LDM_Instr ldm;$/;"	m	union:LDRL_Instr::LDM_Type::__anon20
+ldrl	decode.hpp	/^         LDRL_Type ldrl;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+ldrl	decode.hpp	/^      LDRL_Instr ldrl;$/;"	m	union:LDRL_Instr::LDRL_Type::__anon16
+lsli	decode.hpp	/^      ALU_LSLI_Instr lsli;$/;"	m	union:ALU_Type::__anon1
+lsri	decode.hpp	/^      ALU_LSRI_Instr lsri;$/;"	m	union:ALU_Type::__anon1
+m	decode.hpp	/^   unsigned int m: 1;$/;"	m	struct:MISC_PUSH_Instr
+main	decode.cc	/^int main(int argc, char ** argv) {$/;"	f
+mem	decode.hpp	/^         unsigned int mem;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+mem	decode.hpp	/^      unsigned int mem;$/;"	m	union:ALU_Type::__anon1
+mem	decode.hpp	/^      unsigned int mem;$/;"	m	union:DP_Type::__anon3
+misc	decode.hpp	/^         MISC_Type misc;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+mov	decode.hpp	/^      ALU_MOV8I_Instr mov;$/;"	m	union:ALU_Type::__anon1
+mov	decode.hpp	/^      SP_MOV_Instr mov;$/;"	m	union:SP_Type::__anon6
+op	decode.hpp	/^         unsigned int op: 4;$/;"	m	struct:DP_Type::__anon3::__anon5
+op	decode.hpp	/^         unsigned int op: 5;$/;"	m	struct:LD_ST_Type::__anon8::__anon11
+op	decode.hpp	/^         unsigned int op: 7;$/;"	m	struct:LD_ST_Type::__anon8::__anon10
+op	decode.hpp	/^   unsigned int op: $/;"	m	struct:LDRL_Instr
+op	decode.hpp	/^   unsigned int op: 10;$/;"	m	struct:MISC_SXTH_Instr
+op	decode.hpp	/^   unsigned int op: 3;$/;"	m	struct:ALU_ADD8I_Instr
+op	decode.hpp	/^   unsigned int op: 3;$/;"	m	struct:MISC_PUSH_Instr
+op	decode.hpp	/^   unsigned int op: 4;$/;"	m	struct:COND_B_Instr
+op	decode.hpp	/^   unsigned int op: 5;$/;"	m	struct:ALU_LSLI_Instr
+op	decode.hpp	/^   unsigned int op: 5;$/;"	m	struct:MISC_ADD_Instr
+op	decode.hpp	/^   unsigned int op: 7;$/;"	m	struct:ALU_ADDR_Instr
+op	decode.hpp	/^   unsigned int op: 8;$/;"	m	struct:MISC_BKPT_Instr
+op	decode.hpp	/^   unsigned int op: 9;$/;"	m	struct:SP_ADD_Instr
+op	decode.hpp	/^   unsigned int op: 9;$/;"	m	struct:SP_BX_Instr
+opA	decode.hpp	/^         unsigned int opA: 4;$/;"	m	struct:LD_ST_Type::__anon8::__anon9
+opB	decode.hpp	/^         unsigned int opB: 3;$/;"	m	struct:LD_ST_Type::__anon8::__anon9
+operator !=	decode.hpp	/^  bool operator!=(const Data32 & dd) const { return (data_uint() != dd.data_uint()); }$/;"	f	class:LDRL_Instr::Data32
+operator =	decode.hpp	/^  Register & operator=(unsigned int val) {$/;"	f	class:LDRL_Instr::Register
+operator ==	decode.hpp	/^  bool operator==(const Data32 & dd) const { return (data_uint() == dd.data_uint()); }$/;"	f	class:LDRL_Instr::Data32
+operator Data32	decode.hpp	/^  operator Data32() const { return d; }$/;"	f	class:LDRL_Instr::Register
+operator unsigned int	decode.hpp	/^  operator unsigned int() const { return d.data_uint(); }$/;"	f	class:LDRL_Instr::Register
+operator unsigned int	decode.hpp	/^  operator unsigned int() const { return data_uint(); }$/;"	f	class:LDRL_Instr::Data32
+opts	decode.cc	/^Options opts;$/;"	v
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:ALU_Type::__anon1::__anon2
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:COND_Type::__anon14::__anon15
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:DP_Type::__anon3::__anon4
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:DP_Type::__anon3::__anon5
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:LDRL_Instr::ADD_SP_Type::__anon24::__anon25
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:LDRL_Instr::LDM_Type::__anon20::__anon21
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:LDRL_Instr::LDRL_Type::__anon16::__anon17
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:LDRL_Instr::STM_Type::__anon18::__anon19
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:LDRL_Instr::UNCOND_Type::__anon22::__anon23
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:LD_ST_Type::__anon8::__anon10
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:LD_ST_Type::__anon8::__anon11
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:LD_ST_Type::__anon8::__anon9
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:MISC_Type::__anon12::__anon13
+pad	decode.hpp	/^         unsigned int pad: 16;$/;"	m	struct:SP_Type::__anon6::__anon7
+pad	decode.hpp	/^   unsigned int pad: 16;$/;"	m	struct:ALU_ADD8I_Instr
+pad	decode.hpp	/^   unsigned int pad: 16;$/;"	m	struct:ALU_ADDR_Instr
+pad	decode.hpp	/^   unsigned int pad: 16;$/;"	m	struct:ALU_LSLI_Instr
+pad	decode.hpp	/^   unsigned int pad: 16;$/;"	m	struct:COND_B_Instr
+pad	decode.hpp	/^   unsigned int pad: 16;$/;"	m	struct:MISC_ADD_Instr
+pad	decode.hpp	/^   unsigned int pad: 16;$/;"	m	struct:MISC_BKPT_Instr
+pad	decode.hpp	/^   unsigned int pad: 16;$/;"	m	struct:MISC_PUSH_Instr
+pad	decode.hpp	/^   unsigned int pad: 16;$/;"	m	struct:MISC_SXTH_Instr
+pad	decode.hpp	/^   unsigned int pad: 16;$/;"	m	struct:SP_ADD_Instr
+pad	decode.hpp	/^   unsigned int pad: 16;$/;"	m	struct:SP_BX_Instr
+pc	decode.cc	/^Register pc;$/;"	v
+pop	decode.hpp	/^      MISC_POP_Instr pop;$/;"	m	union:MISC_Type::__anon12
+printCond	decode.hpp	/^      static void printCond(char byte) {$/;"	f	class:LDRL_Instr::ALL_Types
+printD	decode.hpp	/^  static void printD(const Data32 d) {$/;"	f	class:LDRL_Instr::Data32
+program	decode.hpp	/^  bool program;$/;"	m	class:LDRL_Instr::Options
+push	decode.hpp	/^      MISC_PUSH_Instr push;$/;"	m	union:MISC_Type::__anon12
+rd	decode.hpp	/^   unsigned int rd: 3;$/;"	m	struct:ALU_ADDR_Instr
+rd	decode.hpp	/^   unsigned int rd: 3;$/;"	m	struct:ALU_LSLI_Instr
+rd	decode.hpp	/^   unsigned int rd: 3;$/;"	m	struct:MISC_SXTH_Instr
+rdm	decode.hpp	/^   unsigned int rdm: 3;$/;"	m	struct:SP_ADD_Instr
+rdn	decode.hpp	/^         unsigned int rdn: 3;$/;"	m	struct:DP_Type::__anon3::__anon5
+rdn	decode.hpp	/^   unsigned int rdn: 3;$/;"	m	struct:ALU_ADD8I_Instr
+reg_list	decode.hpp	/^   unsigned int reg_list: 8;$/;"	m	struct:MISC_PUSH_Instr
+rev	decode.hpp	/^      MISC_REV_Instr rev;$/;"	m	union:MISC_Type::__anon12
+rev16	decode.hpp	/^      MISC_REV16_Instr rev16;$/;"	m	union:MISC_Type::__anon12
+revsh	decode.hpp	/^      MISC_REVSH_Instr revsh;$/;"	m	union:MISC_Type::__anon12
+rm	decode.hpp	/^         unsigned int rm: 3;$/;"	m	struct:DP_Type::__anon3::__anon5
+rm	decode.hpp	/^         unsigned int rm: 3;$/;"	m	struct:LD_ST_Type::__anon8::__anon10
+rm	decode.hpp	/^   unsigned int rm: 3;$/;"	m	struct:ALU_ADDR_Instr
+rm	decode.hpp	/^   unsigned int rm: 3;$/;"	m	struct:ALU_LSLI_Instr
+rm	decode.hpp	/^   unsigned int rm: 3;$/;"	m	struct:MISC_SXTH_Instr
+rm	decode.hpp	/^   unsigned int rm: 4;$/;"	m	struct:SP_BX_Instr
+rn	decode.hpp	/^         unsigned int rn: 3;$/;"	m	struct:LD_ST_Type::__anon8::__anon10
+rn	decode.hpp	/^         unsigned int rn: 3;$/;"	m	struct:LD_ST_Type::__anon8::__anon11
+rn	decode.hpp	/^   unsigned int rn: 3;$/;"	m	struct:ALU_ADDR_Instr
+rn	decode.hpp	/^   unsigned int rn: 4;$/;"	m	struct:SP_ADD_Instr
+rt	decode.hpp	/^         unsigned int rt: 3;$/;"	m	struct:LD_ST_Type::__anon8::__anon10
+rt	decode.hpp	/^         unsigned int rt: 3;$/;"	m	struct:LD_ST_Type::__anon8::__anon11
+set_data_int	decode.hpp	/^  inline void set_data_int(int arg) { $/;"	f	class:LDRL_Instr::Data32
+set_data_ubyte4	decode.hpp	/^  inline void set_data_ubyte4(int i, unsigned char arg) {$/;"	f	class:LDRL_Instr::Data32
+set_data_uint	decode.hpp	/^  inline void set_data_uint(unsigned int arg) {$/;"	f	class:LDRL_Instr::Data32
+sp	decode.hpp	/^         SP_Type sp;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+stats	decode.hpp	/^  bool stats;$/;"	m	class:LDRL_Instr::Options
+stm	decode.hpp	/^         STM_Type stm;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+stm	decode.hpp	/^      STM_Instr stm;$/;"	m	union:LDRL_Instr::STM_Type::__anon18
+sub	decode.hpp	/^      MISC_SUB_Instr sub;$/;"	m	union:MISC_Type::__anon12
+sub3i	decode.hpp	/^      ALU_SUB3I_Instr sub3i;$/;"	m	union:ALU_Type::__anon1
+sub8i	decode.hpp	/^      ALU_SUB8I_Instr sub8i;$/;"	m	union:ALU_Type::__anon1
+subr	decode.hpp	/^      ALU_SUBR_Instr subr;$/;"	m	union:ALU_Type::__anon1
+sxtb	decode.hpp	/^      MISC_SXTB_Instr sxtb;$/;"	m	union:MISC_Type::__anon12
+sxth	decode.hpp	/^      MISC_SXTH_Instr sxth;$/;"	m	union:MISC_Type::__anon12
+type	decode.hpp	/^         unsigned int type: 6;$/;"	m	struct:DP_Type::__anon3::__anon5
+type	decode.hpp	/^      } type;$/;"	m	class:LDRL_Instr::ALL_Types	typeref:union:LDRL_Instr::ALL_Types::__anon26
+type	decode.hpp	/^   unsigned int type: 4;$/;"	m	struct:MISC_ADD_Instr
+type	decode.hpp	/^   unsigned int type: 4;$/;"	m	struct:MISC_PUSH_Instr
+type_check	decode.hpp	/^         unsigned int type_check: 2;$/;"	m	struct:ALU_Type::__anon1::__anon2
+type_check	decode.hpp	/^         unsigned int type_check: 4;$/;"	m	struct:COND_Type::__anon14::__anon15
+type_check	decode.hpp	/^         unsigned int type_check: 4;$/;"	m	struct:MISC_Type::__anon12::__anon13
+type_check	decode.hpp	/^         unsigned int type_check: 5;$/;"	m	struct:LDRL_Instr::ADD_SP_Type::__anon24::__anon25
+type_check	decode.hpp	/^         unsigned int type_check: 5;$/;"	m	struct:LDRL_Instr::LDM_Type::__anon20::__anon21
+type_check	decode.hpp	/^         unsigned int type_check: 5;$/;"	m	struct:LDRL_Instr::LDRL_Type::__anon16::__anon17
+type_check	decode.hpp	/^         unsigned int type_check: 5;$/;"	m	struct:LDRL_Instr::STM_Type::__anon18::__anon19
+type_check	decode.hpp	/^         unsigned int type_check: 5;$/;"	m	struct:LDRL_Instr::UNCOND_Type::__anon22::__anon23
+type_check	decode.hpp	/^         unsigned int type_check: 6;$/;"	m	struct:DP_Type::__anon3::__anon4
+type_check	decode.hpp	/^         unsigned int type_check: 6;$/;"	m	struct:SP_Type::__anon6::__anon7
+uncond	decode.hpp	/^         UNCOND_Type uncond;$/;"	m	union:LDRL_Instr::ALL_Types::__anon26
+uxtb	decode.hpp	/^      MISC_UXTB_Instr uxtb;$/;"	m	union:MISC_Type::__anon12
+uxth	decode.hpp	/^      MISC_UXTH_Instr uxth;$/;"	m	union:MISC_Type::__anon12
+write	decode.hpp	/^  void write(unsigned int val) {$/;"	f	class:LDRL_Instr::Register
+writes	decode.hpp	/^  bool writes;$/;"	m	class:LDRL_Instr::Options
