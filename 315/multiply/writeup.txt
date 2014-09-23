@@ -1,0 +1,19 @@
+CPE 315 - Lab 3 Writeup
+Thomas Steinke & Elliot Fiske
+
+* Compute the total number of dynamic instructions required for your program to compute the product of -2 and 101. 
+* Describe how this number changes when you swap the multiplier and the multiplicand.
+
+Instructions required for -2 * 101: 56
+Instructions required for 101 * -2: 95
+
+Originally, swapping the multiplier and multiplicand made a huge difference
+for our program, since every time our mult function encountered a 1, it was
+programmed to branch to an add call, which could take anywhere from 5-10 or
+more commands (-2 * 101 was originally 598 commands). However, we figured
+that since some numbers, like -2, might involve a lot of addition in this way,
+we could optimize the process. For the tradeoff of a few commands in the best
+case (101 * -2 was 89 commands, now it is 95), we made the average case run
+much faster by making the multiplicand positive before running the rest of
+the function. Then it was just a matter of multiplying the result by -1 at
+the end, leading to much faster run times.

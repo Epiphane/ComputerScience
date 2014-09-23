@@ -1,0 +1,135 @@
+Homework 1
+Thomas Steinke
+
+1.Suppose we have two implementations of the same instruction set architecture (ISA). For some program,
+   - Machine A has a clock cycle time of 10 ns and a CPI of 2.0
+   - Machine B has a clock cycle time of 20 ns and a CPI of 1.2
+What machine is faster for this program, and by how much?
+: Runtime A   (10 ns/cycle) * (2.0 CPI) * I   20
+: --------- = ----------------------------- = --
+: Runtime B   (20 ns/cycle) * (1.2 CPI) * I   24
+:
+: Machine A is faster by 24 / 20 = 1.2, or 20%
+
+If two machines have the same ISA for a given program which of our quantities will always be identical?
+: Instruction count
+
+
+2. A compiler designer is trying to decide between two code sequences for a particular machine. 
+   - Class A, Class B, and Class C require one, two, and three cycles (respectively).
+   - The first code sequence has 5 instructions: 2 of A, 1 of B, and 2 of C.
+   - The second sequence has 6 instructions: 4 of A, 1 of B, and 1 of C.
+Which sequence will be faster? How much?
+: The second sequence would be faster by 1 cycle, or about 1/9 = 11.11%
+
+What is the CPI for each sequence?
+: First sequence = 2 CPI
+: Second sequence = 1.5 CPI
+
+
+3. Two differeet compilers are being tested for a 3 GHz machine with 
+   - Three different classes of instructions: Class A, Class B, and Class C, which require one, two, and three cycles (respectively). 
+   - The first compiler's code uses 5 million Class A instructions, 1 million Class B instructions, and 1 million Class C instructions.
+   - The second compiler's code uses 10 million Class A instructions, 1 millionClass B instructions, and 1 million Class C instructions.
+Which sequence will have a greater number of instructions per second?
+: First compiler: 10/7 CPI
+:  7/10 IPC * (3 * 10^9 C/s) = 2.1 ^ 10^7 IPS
+: Second compiler: 5/4 CPI
+:  8/10 IPC * (3 * 10^9 C/s) = 2.4 ^ 10^7 IPS
+: 
+: The second compiler's code performs .3 * 10^7 more instructions per second,
+: giving it (0.3) / (2.4) = 12.5% greater IPS
+
+Which sequence will have the faster runtime?
+:                 Class A     Class B     Class C     Total cycles
+: First sequence  5mil * 1    1mil * 2    1mil * 3    10 million
+: Second sequence 10mil * 1   1mil * 2    1mil * 3    15 million
+:
+: The first sequence is 50% faster
+
+
+4. For the following mix of instructions:
+   +------------------+-------------+---------+
+   |  Operation Type  |  Frequency  | Cycles  |
+   +------------------+-------------+---------+
+   |        ALU       |     50%     |    1    |
+   |       Load       |     20%     |    5    |
+   |       Store      |     10%     |    3    |
+   |      Branch      |     20%     |    2    |
+   +------------------+-------------+---------+
+What's the CPI?
+: 0.5 + 5(0.2) + 3(0.1) + 2(0.2)
+: = 2.2 CPI
+
+How much faster would the machine be if the average load time was reduced to 2 cycles?
+: 2.2 / (2.2 - 5(0.2) + 2(0.2))
+: Speedup = 1.375
+
+How does this compare with shaving a cycle off the branch time?
+: 2.2 / (2.2 - 2(0.2) + 0.2)
+: Speedup = 1.1
+: Not as dramatic at reducing the load time
+
+What if two ALU instructions could (always) be executed at once?
+: 2.2 / (2.2 - 0.5 + (0.5)(0.5))
+: Speedup = 1.128
+
+
+5. Suppose a program runs in 100 seconds on a machine, with multiply responsible for 80 seconds of this time. 
+How much do we have to improve the speed of multiplication if we want the program to run 4 times faster?
+: 4 = 1 / (0.2 + 0.8/S)
+: 3.2 / S = 0.2
+: Speedup = 16 times faster
+
+How about making it 5 times faster?
+: Since that would bring execution time down to 20s, which is the execution 
+: time of the non-multiply part of the program, the multiply portion would
+: have to speed up by a factor of infinite, which is impossible without taking it
+: out entirely.
+
+
+6. Suppose we enhance a machine making all floating-point instructions run five times faster. 
+If the execution time of some benchmark before the floating-point enhancement is 10 seconds, what will the speedup be if half of the 10 seconds is spent executing floating-point instructions?
+: Speedup = 1 / (0.5 + 0.5/5)
+: Speedup = 1.66
+
+
+7. We are looking for a benchmark to show off the new floating-point unit described in Problem 6, and want the overall benchmark to show a speedup of 3. 
+   - We are considering a benchmark that runs for 100 seconds with the old floating-point hardware. 
+How much of the execution time would floating-point instructions have to account for in this program in order to yield our desired speedup on this benchmark?
+: 3 = 1 / (1 - F + F/5)
+: 3 - 12/5 * F = 1
+: 12/5 F = 2
+: F = 5/6 = 83.33s (or 16.66s of final runtime)
+
+
+8. For the following mix of instructions:
+   +------------------+-------------+---------+
+   |  Operation Type  |  Frequency  | Cycles  |
+   +------------------+-------------+---------+
+   |        ALU       |     50%     |    1    |
+   |       Load       |     20%     |    2    |
+   |       Store      |     10%     |    2    |
+   |     Jump/Call    |     10%     |    1    |
+   |      Branch      |     10%     |    3    |
+   +------------------+-------------+---------+
+Calculate CPI for this program.
+: 0.5 + 2(0.2) + 2(0.1) + 0.1 + 3(0.1)
+: = 1.5 CPI
+
+If this runs on a 3.3 GHz processor, how many instructions per second (IPS) execute?
+: 2/3 IPC * (3.3 * 10^9 C/s)
+: = 2.2 * 10^9 IPS
+
+Your compiler team reports they can eliminate 20% of ALU instructions (i.e. 10% of all instructions). What is the speedup?
+: New CPI = 10/9 * (0.4 + 2(0.2) + 2(0.1) + 0.1 + 3(0.1)) = 1.55 CPI
+:
+:           Runtime_i   CCT * CPI * I   1.5  *     I
+: Speedup = --------- = ------------- = ------------- = 1.075
+:           Runtime_f   CCT * CPI * I   1.55 * (0.9I)
+
+With the compiler improvements, what is the new CPI and IPS?
+: 1.55 CPI
+: 
+: 9/14 IPC * (3.3 * 10^9 C/s)
+: = 2.1 * 10^9 IPS
