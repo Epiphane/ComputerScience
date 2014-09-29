@@ -14,6 +14,7 @@ import java.util.Scanner;
 public class DestTestClass {
 	public static void main(String[] args) {
 		int ladderHeight, highestSafeRung;
+		int totalDrops = 0;
 		
 		Scanner scanman = new Scanner(System.in);
 		
@@ -33,6 +34,27 @@ public class DestTestClass {
 			totalDropHeights += firstDropHeight;
 		}
 		
-		System.out.println(firstDropHeight);
+		// Actual algorithm: Move up firstDropHeight, then firstDropHeight - 1, etc...
+		totalDropHeights = 0; // What rung we're standing on
+		while(totalDrops ++ && totalDropHeights <= highestSafeRung) {
+			// Move up and drop again...
+			totalDropHeights += firstDropHeight --;
+		}
+		
+		// First break! Go back down almost to the last rung we tested on.
+		int firstBreak = totalDropHeights;
+		totalDropHeights -= firstDropHeight;
+		
+		// Drop it one rung at a time
+		while(totalDrops ++ && totalDropHeights <= highestSafeRung) {
+			// move up
+			totalDropHeights ++;
+		}
+		
+		// Second break is one rung below us!
+		System.out.println("Highest safe rung determined by this experiment: " + totalDropHeights - 1);
+		System.out.println("Rung where the first test device broke: " + firstBreak);
+		System.out.println("Rung where the second test device broke: " + totalDropHeights);
+		System.out.println("Total number of drops: " + totalDrops);
 	}
 }
