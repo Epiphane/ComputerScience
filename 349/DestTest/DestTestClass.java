@@ -28,33 +28,47 @@ public class DestTestClass {
 
 		// Begin algorithm. Find the drop height we want to start from
 		int firstDropHeight = 0;
-		int totalDropHeights = 0;
-		while(totalDropHeights < ladderHeight) {
+		int totalDropHeights = 1;
+		while(totalDropHeights <= ladderHeight) {
 			firstDropHeight ++;
 			totalDropHeights += firstDropHeight;
 		}
 
 		// Actual algorithm: Move up firstDropHeight, then firstDropHeight - 1, etc...
 		totalDropHeights = 0; // What rung we're standing on
-		while(totalDrops ++ >= 0 && totalDropHeights <= highestSafeRung) {
+		while(totalDropHeights <= highestSafeRung && totalDropHeights < ladderHeight) {
 			// Move up and drop again...
 			totalDropHeights += firstDropHeight --;
+      // Cant go over the top of the ladder!
+      if(totalDropHeights > ladderHeight) {
+        totalDropHeights = ladderHeight;
+      }
+      totalDrops ++;
 		}
 
-		// First break! Go back down almost to the last rung we tested on.
-		int firstBreak = totalDropHeights;
-		totalDropHeights -= firstDropHeight;
+    // If it never broke, we're done!
+    if(totalDropHeights > highestSafeRung) {
+      // First break! Go back down almost to the last rung we tested on.
+      int firstBreak = totalDropHeights;
+      totalDropHeights -= firstDropHeight;
 
-		// Drop it one rung at a time
-		while(totalDrops ++ >= 0 && totalDropHeights <= highestSafeRung) {
-			// move up
-			totalDropHeights ++;
-		}
+      // Drop it one rung at a time
+      while(totalDrops ++ >= 0 && totalDropHeights <= highestSafeRung) {
+        // move up
+        totalDropHeights ++;
+      }
 
-		// Second break is one rung below us!
-		System.out.println("Highest safe rung determined by this experiment: " + (totalDropHeights - 1));
-		System.out.println("Rung where the first test device broke: " + firstBreak);
-		System.out.println("Rung where the second test device broke: " + totalDropHeights);
-		System.out.println("Total number of drops: " + totalDrops);
+      // Second break is one rung below us!
+      System.out.println("Highest safe rung determined by this experiment: " + (totalDropHeights - 1));
+      System.out.println("Rung where the first test device broke: " + firstBreak);
+      System.out.println("Rung where the second test device broke: " + totalDropHeights);
+      System.out.println("Total number of drops: " + totalDrops);
+    }
+    else {
+      System.out.println("Highest safe rung determined by this experiment: " + totalDropHeights);
+      System.out.println("Rung where the first test device broke: N/A");
+      System.out.println("Rung where the second test device broke: N/A");
+      System.out.println("Total number of drops: " + totalDrops);
+    }
 	}
 }
