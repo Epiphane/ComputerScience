@@ -30,7 +30,7 @@ public class TopSortValid {
     }
 
     for(int i = 0; i < graph.nvertices; i ++) {
-      System.out.print(graph.topology[i] + " ");
+      System.out.print(graph.topology[i + 1] + " ");
     }
     System.out.print("is ");
 
@@ -50,9 +50,9 @@ public class TopSortValid {
       }
 
       // Otherwise keep walking
-      ArrayList<Integer> edges = graph.edges[i];
+      ArrayList<Integer> edges = graph.edges[topology[i]];
       while(edges.size() > 0) {
-        graph.remove_edge(i, edges.get(0));
+        graph.remove_edge(topology[i], edges.get(0));
       }
     }
 
