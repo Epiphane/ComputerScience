@@ -9,7 +9,7 @@ import java.util.Collections;
 // This is a very simple graph class,
 // May get a compiler error due to use of array of ArrayLists
 
-class DAG
+class GraphStart
 {
 	static final int MAXV = 100;
 	static final int MAXDEGREE = 50;
@@ -20,7 +20,7 @@ class DAG
 	public int nvertices;
 	public int nedges;
 
-	DAG()   {                     // constructor
+	GraphStart()   {                     // constructor
 		nvertices = nedges = 0;
 		for(int i=0;i<=MAXV;i++) {
 			degree[i] = 0;

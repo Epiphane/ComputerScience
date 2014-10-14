@@ -2,15 +2,17 @@ import java.util.ArrayList;
 import java.io.FileNotFoundException;
 
 /**
- * TopologicalSort.java
+ * TopSortValid.java
  *
  * Checks whether a given topological sort is correct
+ * CHANGES to GraphStart class
+ * Added int[] GraphStart.topology, which holds a proposed topological sort.
  *
  * @author tsteinke
  *
  */
 
-public class TopologicalSort {
+public class TopSortValid {
   public static void main(String[] args) {
     if(args.length == 0) {
       System.out.println("Provide the filename!");
@@ -18,7 +20,7 @@ public class TopologicalSort {
     }
 
     // Create graph
-    DAG graph = new DAG();
+    GraphStart graph = new GraphStart();
     try {
       graph.readfile_graph(args[0]);
     }
@@ -39,7 +41,7 @@ public class TopologicalSort {
     System.out.println("a valid topological sort for the given graph");
   }
 
-  public static boolean validTopologicalSort(DAG graph, int[] topology) {
+  public static boolean validTopologicalSort(GraphStart graph, int[] topology) {
     // Verify each vertex's n-index
     for(int i = 1; i < topology.length; i ++) {
       // If it's not degree 0, game over
