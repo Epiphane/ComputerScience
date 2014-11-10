@@ -1,25 +1,2 @@
 atattat
 gggatattatag
-
---- gaps on both ends of x
-
-gggatattatag
-atattat
-
---- gaps on both ends of y
-
-atattat
-atattatag
-
---- above last gaps at end of x
-
-atattatag
-atattat
-
---- above last gaps at end of y
-
-
-AACAGTTACC
-TAAGGTCA
-
--- example from assignment
