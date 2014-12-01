@@ -169,9 +169,6 @@ public class Knapsack {
   /* DYNAMIC PROGRAMMING ALGORITHM */
   public static ArrayList<Integer> dynamic(Item[] items, int C) {
     int[][] solutions = new int[items.length + 1][C + 1];
-    for(int i = 1; i < items.length + 1; i ++)
-      for(int j = 1; j < C + 1; j ++)
-        solutions[i][j] = -1;
 
     dynamicKnapsack(solutions, items, items.length, C);
     return dynamicBacktrack(solutions, items);
@@ -185,14 +182,14 @@ public class Knapsack {
     // Either add this item to a collection of items that fit in
     // A knapsack with W[item] less capacity...
     if(weightWithoutItem >= 0) {
-      if(solutions[item - 1][weightWithoutItem] < 0) {
+      if(solutions[item - 1][weightWithoutItem] == 0 && item > 1 && weightWithoutItem > 1) {
         dynamicKnapsack(solutions, items, item - 1, weightWithoutItem);
       }
 
       leftMax = solutions[item - 1][weightWithoutItem] + items[item - 1].value;
     }
     // Or don't add it in, instead fitting something else
-    if(solutions[item - 1][weight] < 0)
+    if(solutions[item - 1][weight] == 0 && item > 1)
       dynamicKnapsack(solutions, items, item - 1, weight);
 
     int rightMax = solutions[item - 1][weight];
@@ -283,6 +280,7 @@ public class Knapsack {
     PriorityQueue<Leaf> queue = new PriorityQueue<Leaf>();
     queue.add(new Leaf(new boolean[0]));
 
+    long l = 0;
     Leaf bestSolution = null;
     int bound = -1;
     while(queue.size() > 0) {
@@ -304,7 +302,10 @@ public class Knapsack {
       // Don't go on forever
       if(System.currentTimeMillis() - startTime > maxTime)
         break;
+      l ++;
     }
+
+    System.out.println(l);
 
     ArrayList<Integer> result = new ArrayList<Integer>();
     for(int i = 0; i < items.length; i ++) {
