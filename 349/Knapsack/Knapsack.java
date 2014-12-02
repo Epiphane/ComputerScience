@@ -63,8 +63,7 @@ public class Knapsack {
     // Read in capacity
     int capacity = input.nextInt();
 
-    long startTime = System.currentTimeMillis();
-    if(args.length > 1 && args[1].equals("--enum"))
+    if(args.length > 1 && args[1].indexOf("e") > -1)
       printSoln("Using Brute force the best feasible solution found: ",
         items, fullEnumeration(items, capacity));
 
@@ -72,9 +71,10 @@ public class Knapsack {
       items, greedy(items, capacity));
     printSoln("Dynamic Programming Solution: ",
       items, dynamic(items, capacity));
-    long dt = System.currentTimeMillis() - startTime;
+
+    if(args.length > 1 && args[1].indexOf("b") > -1)
     printSoln("Using BnB the best feasible solution found: ",
-      items, branchAndBound(items, capacity, dt * 10));
+      items, branchAndBound(items, capacity));
   }
 
   public static void printSoln(String intro, Item[] items,
@@ -87,6 +87,23 @@ public class Knapsack {
       weight   += items[item].weight;
       value    += items[item].value;
       itemList += (item + 1) + " ";
+    }
+
+    System.out.println(intro + value + " " + weight);
+    System.out.println(itemList);
+  }
+
+  public static void printSoln(String intro, Item[] items, boolean[] solution) {
+
+    int weight = 0;
+    int value = 0;
+    String itemList = "";
+    for(int i = 0; i < items.length; i ++) {
+      if(solution[i]) {
+        weight   += items[i].weight;
+        value    += items[i].value;
+        itemList += (i + 1) + " "; 
+      }
     }
 
     System.out.println(intro + value + " " + weight);
@@ -219,24 +236,19 @@ public class Knapsack {
     public final boolean[] config;
     public int value, weight, bound;
 
-    public Leaf(boolean[] config) { this.config = config; }
+    public Leaf(boolean[] config, int v, int w) { this.config = config; value = v; weight = w;}
 
-    public Leaf child(boolean next, Integer[] indexes, Item[] items, int bound, int C) {
+    public Leaf child(boolean next, Integer[] indexes, Item[] items, int C) {
       int nextIndex = config.length;
       boolean[] nextConfig = new boolean[nextIndex + 1];
       System.arraycopy(config, 0, nextConfig, 0, nextIndex);
 
       nextConfig[nextIndex] = next;
-      Leaf child = new Leaf(nextConfig);
+      Leaf child = new Leaf(nextConfig, value, weight);
 
       if(next) {
-        child.weight = weight + items[indexes[nextIndex]].weight;
-        if(child.weight > C) return null;
-        child.value = value + items[indexes[nextIndex]].value;
-      }
-      else {
-        child.weight = weight;
-        child.value = value;
+        child.weight += items[indexes[nextIndex]].weight;
+        child.value += items[indexes[nextIndex]].value;
       }
 
       // Bound is calculated by (remaining capacity) * (V/W of next best item)
@@ -248,8 +260,6 @@ public class Knapsack {
           * items[nextNextIndex].value / items[nextNextIndex].weight;
       }
       
-      if(bound != -1 && child.bound < bound)
-        return null;
       return child;
     }
 
@@ -266,53 +276,35 @@ public class Knapsack {
     }
   }
 
-  public static ArrayList<Integer> branchAndBound(Item[] itemsUnsorted, int C, long maxTime) {
-    long startTime = System.currentTimeMillis();
-    // Order items by value/weight ratio
-    Item[] items = itemsUnsorted.clone();
-
-    // Sort the indexes, getting the order from greatest to least
-    ItemEfficiencyComp sorter = new ItemEfficiencyComp(items);
+  public static boolean[] branchAndBound(Item[] items, int C) {
+    // Order items by value/weight ratio, just like in GreedySolution
+    ItemEfficiencyComp sorter = new ItemEfficiencyComp(items.clone());
     Integer[] indexes = sorter.createIndexArray();
     Arrays.sort(indexes, sorter);
 
     // Create queue with head of tree
     PriorityQueue<Leaf> queue = new PriorityQueue<Leaf>();
-    queue.add(new Leaf(new boolean[0]));
+    queue.add(new Leaf(new boolean[0], 0, 0));
 
-    long l = 0;
     Leaf bestSolution = null;
-    int bound = -1;
     while(queue.size() > 0) {
       Leaf parent = queue.poll();
+      if(parent.weight > C) continue; // Pass over it if it's too heavy
 
       if(parent.config.length == items.length) {
         if(bestSolution == null || parent.value > bestSolution.value) {
           bestSolution = parent;
-          bound = parent.value;
         }
       }
       else if(bestSolution == null || bestSolution.value < parent.bound) {
-        Leaf trueChild  = parent.child(true, indexes, items, bound, C);
-        Leaf falseChild = parent.child(false, indexes, items, bound, C);
-        if(trueChild != null)  queue.add(trueChild);
-        if(falseChild != null) queue.add(falseChild);
+        queue.add(parent.child(true, indexes, items, C));
+        queue.add(parent.child(false, indexes, items, C));
       }
-
-      // Don't go on forever
-      if(System.currentTimeMillis() - startTime > maxTime)
-        break;
-      l ++;
     }
 
-    System.out.println(l);
-
-    ArrayList<Integer> result = new ArrayList<Integer>();
-    for(int i = 0; i < items.length; i ++) {
-      if(bestSolution.config[i])
-        result.add(indexes[i]);
-    }
-    Collections.sort(result);
-    return result;
+    boolean[] solution = new boolean[bestSolution.config.length];
+    for(int i = 0; i < bestSolution.config.length; i ++)
+      solution[indexes[i]] = bestSolution.config[i];
+    return solution;
   }
 }
