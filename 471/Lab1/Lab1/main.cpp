@@ -28,14 +28,17 @@ int main(void) {
   
   int *val = (int *)points;
   for(int i = 0; i < 9; i ++) {
-//    scanf("%d", val++);
-    *val++ = 50 * (i + 1);
+    scanf("%d", val++);
   }
-  
-  int min_x = std::min({points[0].x, points[1].x, points[2].x});
-  int min_y = std::min({points[0].y, points[1].y, points[2].y});
-  int max_x = std::max({points[0].x, points[1].x, points[2].x});
-  int max_y = std::max({points[0].y, points[1].y, points[2].y});
+
+  int min_x = points[0].x, max_x = points[0].x;
+  int min_y = points[0].y, max_y = points[0].y;
+  for(int i = 1; i < 3; i ++) {
+    if(points[i].x < min_x) min_x = points[i].x;
+    if(points[i].x > max_x) max_x = points[i].x;
+    if(points[i].y < min_y) min_y = points[i].y;
+    if(points[i].y > max_y) max_y = points[i].y;
+  }
   
   // make a color
   color_t clr;
@@ -57,12 +60,6 @@ int main(void) {
       clr.r = (float) clr.r / 255;
       clr.g = (float) clr.g / 255;
       clr.b = (float) clr.b / 255;
-      
-      if(i == min_x && j == min_y) {
-        std::cout << clr.r << std::endl;
-        std::cout << clr.g << std::endl;
-        std::cout << clr.b << std::endl;
-      }
       
       img.pixel(i, j, clr);
     }
