@@ -63,6 +63,7 @@ public class Knapsack {
     // Read in capacity
     int capacity = input.nextInt();
 
+    long start = System.currentTimeMillis();
     if(args.length > 1 && args[1].indexOf("e") > -1)
       printSoln("Using Brute force the best feasible solution found: ",
         items, fullEnumeration(items, capacity));
@@ -72,9 +73,10 @@ public class Knapsack {
     printSoln("Dynamic Programming Solution: ",
       items, dynamic(items, capacity));
 
+    long dt = System.currentTimeMillis() - start;
     if(args.length > 1 && args[1].indexOf("b") > -1)
     printSoln("Using BnB the best feasible solution found: ",
-      items, branchAndBound(items, capacity));
+      items, branchAndBound(items, capacity, dt * 100));
   }
 
   public static void printSoln(String intro, Item[] items,
@@ -276,7 +278,9 @@ public class Knapsack {
     }
   }
 
-  public static boolean[] branchAndBound(Item[] items, int C) {
+  public static boolean[] branchAndBound(Item[] items, int C, long maxTime) {
+    long startTime = System.currentTimeMillis();
+
     // Order items by value/weight ratio, just like in GreedySolution
     ItemEfficiencyComp sorter = new ItemEfficiencyComp(items.clone());
     Integer[] indexes = sorter.createIndexArray();
@@ -291,6 +295,8 @@ public class Knapsack {
       Leaf parent = queue.poll();
       if(parent.weight > C) continue; // Pass over it if it's too heavy
 
+      if(parent.config.length == 90) System.out.println(parent);
+
       if(parent.config.length == items.length) {
         if(bestSolution == null || parent.value > bestSolution.value) {
           bestSolution = parent;
@@ -300,6 +306,11 @@ public class Knapsack {
         queue.add(parent.child(true, indexes, items, C));
         queue.add(parent.child(false, indexes, items, C));
       }
+
+      // if(System.currentTimeMillis() - startTime > maxTime) {
+        // System.out.println("Stopping BnB early...");
+        // break;
+      // }
     }
 
     boolean[] solution = new boolean[bestSolution.config.length];
