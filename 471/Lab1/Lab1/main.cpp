@@ -11,7 +11,6 @@
 #include <algorithm>
 #include "Image.h"
 #include "types.h"
-#include "lodepng.h"
 
 #include "cage.cpp"
 
@@ -22,10 +21,9 @@ typedef struct Point {
 void decodeWithState(const char* filename);
 
 int main(void) {
-  
-  Point points[3];
   printf("Enter the points of the triangle (x y z): ");
   
+  Point points[3];
   int *val = (int *)points;
   for(int i = 0; i < 9; i ++) {
     scanf("%d", val++);
