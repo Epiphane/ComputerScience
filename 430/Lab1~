@@ -1,0 +1,4 @@
+#lang plai-typed
+
+;; Compute euros, given $
+(define (dollar->euro [dollars : number]) (* dollars 0.84))

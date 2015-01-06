@@ -39,13 +39,11 @@ public class DestTestClass {
 		while(totalDropHeights <= highestSafeRung && totalDropHeights < ladderHeight) {
 			// Move up and drop again...
 			totalDropHeights += firstDropHeight --;
-         
-         // Cant go over the top of the ladder!
-         if(totalDropHeights > ladderHeight) {
-           totalDropHeights = ladderHeight;
-         }
-         
-         totalDrops ++;
+      // Cant go over the top of the ladder!
+      if(totalDropHeights > ladderHeight) {
+        totalDropHeights = ladderHeight;
+      }
+      totalDrops ++;
 		}
 
       // If it never broke, we're done!
