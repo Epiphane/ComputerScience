@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		81D3347F1A5C8CCF0067C1F7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81D3347E1A5C8CCF0067C1F7 /* main.cpp */; };
 		81D334881A5C8D1D0067C1F7 /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81D334851A5C8D1D0067C1F7 /* Image.cpp */; };
-		81D3348D1A5C96F30067C1F7 /* lodepng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81D3348C1A5C96F30067C1F7 /* lodepng.cpp */; };
 		81D3348F1A5C97CA0067C1F7 /* cage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81D3348E1A5C97CA0067C1F7 /* cage.cpp */; };
 /* End PBXBuildFile section */
 
@@ -31,8 +30,6 @@
 		81D334851A5C8D1D0067C1F7 /* Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Image.cpp; sourceTree = "<group>"; };
 		81D334861A5C8D1D0067C1F7 /* Image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Image.h; sourceTree = "<group>"; };
 		81D334871A5C8D1D0067C1F7 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
-		81D3348A1A5C960C0067C1F7 /* lodepng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lodepng.h; sourceTree = "<group>"; };
-		81D3348C1A5C96F30067C1F7 /* lodepng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lodepng.cpp; sourceTree = "<group>"; };
 		81D3348E1A5C97CA0067C1F7 /* cage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cage.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -67,8 +64,6 @@
 			isa = PBXGroup;
 			children = (
 				81D3348E1A5C97CA0067C1F7 /* cage.cpp */,
-				81D3348C1A5C96F30067C1F7 /* lodepng.cpp */,
-				81D3348A1A5C960C0067C1F7 /* lodepng.h */,
 				81D334851A5C8D1D0067C1F7 /* Image.cpp */,
 				81D334861A5C8D1D0067C1F7 /* Image.h */,
 				81D334871A5C8D1D0067C1F7 /* types.h */,
@@ -135,7 +130,6 @@
 			files = (
 				81D3347F1A5C8CCF0067C1F7 /* main.cpp in Sources */,
 				81D3348F1A5C97CA0067C1F7 /* cage.cpp in Sources */,
-				81D3348D1A5C96F30067C1F7 /* lodepng.cpp in Sources */,
 				81D334881A5C8D1D0067C1F7 /* Image.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
