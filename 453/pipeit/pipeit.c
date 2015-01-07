@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
       close(ls[1]);   // Close pipe output
 
       // Open outfile
-      outfile = open("outfile", O_CREAT | O_TRUNC | O_RDWR, "w");
+      outfile = open("outfile", O_CREAT | O_TRUNC | O_RDWR, 0666);
       if(errno) {
          printf("Error opening outfile: %s\n", strerror(errno));
          
