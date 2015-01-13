@@ -25,6 +25,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		812C27CD1A6464E400491041 /* bunny.obj */ = {isa = PBXFileReference; lastKnownFileType = text; path = bunny.obj; sourceTree = "<group>"; };
 		81CE4B1D1A5F3EB00078D84F /* Program1 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Program1; sourceTree = BUILT_PRODUCTS_DIR; };
 		81CE4B271A5F3ED50078D84F /* cube.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cube.obj; sourceTree = "<group>"; };
 		81CE4B281A5F3ED50078D84F /* Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Image.cpp; sourceTree = "<group>"; };
@@ -65,6 +66,7 @@
 		81CE4B1F1A5F3EB00078D84F /* Program1 */ = {
 			isa = PBXGroup;
 			children = (
+				812C27CD1A6464E400491041 /* bunny.obj */,
 				81CE4B271A5F3ED50078D84F /* cube.obj */,
 				81CE4B281A5F3ED50078D84F /* Image.cpp */,
 				81CE4B291A5F3ED50078D84F /* Image.h */,
@@ -248,6 +250,7 @@
 				81CE4B261A5F3EB00078D84F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
