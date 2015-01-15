@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		812BEAA71A65D912002AF141 /* cage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 812BEAA61A65D912002AF141 /* cage.cpp */; };
 		81CE4B2E1A5F3ED50078D84F /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81CE4B281A5F3ED50078D84F /* Image.cpp */; };
 		81CE4B2F1A5F3ED50078D84F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81CE4B2A1A5F3ED50078D84F /* main.cpp */; };
 		81CE4B301A5F3ED50078D84F /* tiny_obj_loader.cc in Sources */ = {isa = PBXBuildFile; fileRef = 81CE4B2C1A5F3ED50078D84F /* tiny_obj_loader.cc */; };
@@ -25,6 +26,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		812BEAA61A65D912002AF141 /* cage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cage.cpp; sourceTree = "<group>"; };
 		812C27CD1A6464E400491041 /* bunny.obj */ = {isa = PBXFileReference; lastKnownFileType = text; path = bunny.obj; sourceTree = "<group>"; };
 		81CE4B1D1A5F3EB00078D84F /* Program1 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Program1; sourceTree = BUILT_PRODUCTS_DIR; };
 		81CE4B271A5F3ED50078D84F /* cube.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cube.obj; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 		81CE4B1F1A5F3EB00078D84F /* Program1 */ = {
 			isa = PBXGroup;
 			children = (
+				812BEAA61A65D912002AF141 /* cage.cpp */,
 				812C27CD1A6464E400491041 /* bunny.obj */,
 				81CE4B271A5F3ED50078D84F /* cube.obj */,
 				81CE4B281A5F3ED50078D84F /* Image.cpp */,
@@ -135,6 +138,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				81CE4B2E1A5F3ED50078D84F /* Image.cpp in Sources */,
+				812BEAA71A65D912002AF141 /* cage.cpp in Sources */,
 				81CE4B301A5F3ED50078D84F /* tiny_obj_loader.cc in Sources */,
 				81CE4B2F1A5F3ED50078D84F /* main.cpp in Sources */,
 			);
