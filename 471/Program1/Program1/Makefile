@@ -14,3 +14,6 @@ tiny_obj_loader.o: tiny_obj_loader.cc
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+clear:
+	rm *.o
