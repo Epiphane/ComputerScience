@@ -9,7 +9,6 @@
 class Point {
 public:
     Point() {};
-    Point(double _x, double _y, double _z) : xyz{_x, _y, _z} {};
 
     double xyz[3];
     double getX() { return xyz[0]; }
@@ -71,8 +70,6 @@ int main( int argc, const char* argv[] )
 	std::string inputfile = argv[1];
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
-    
-    int coloring = 3;
 
 	std::string err = tinyobj::LoadObj(shapes, materials, inputfile.c_str());
 
@@ -86,9 +83,11 @@ int main( int argc, const char* argv[] )
     resize_obj(shapes);
 
     // make a 640x480 image (allocates buffer on the heap)
-    int w_width, w_height;
+    int coloring, w_width, w_height;
     std::cout << "Enter window size (width height): ";
     std::cin >> w_width >> w_height;
+    std::cout << "Enter gradient type (1: z-depth, 2: x-value, 3: both)";
+    std::cin >> coloring;
     
     Image img(w_width, w_height);
     double zBuffer[img.width() * img.height()];

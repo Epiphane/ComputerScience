@@ -33,7 +33,9 @@
 ;; ----------------------------------------------------------------------------
 ;; 2.3 Low-degree Polynomials
 ;; Representation for a polynomial
-;; No implementation
+(define-type Polynomial
+  [linear (a : number) (b : number)]
+  [quadratic (a : number) (b : number) (c : number)])
 
 ;; Evaluates a polynomial
 ;; No implementation...
@@ -56,8 +58,10 @@
 
 ;; ----------------------------------------------------------------------------
 ;; 2.5 Binary Tree
-;; Representation for binary tree objects
-;; No implementation...
+;; Represents binary tree objects
+(define-type BTree
+  [leaf (value : symbol)]
+  [node (left : BTree) (right : BTree)])
 
 (define tree1 (leaf 'abc))
 (define tree2 (node (leaf 'abc) 
