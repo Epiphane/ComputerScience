@@ -26,7 +26,7 @@ void *heapEnd = NULL;
 const int PAGE_SIZE = 64 * 1024;
 
 void debugPointer(void *ptr, size_t size) {
-  printf("(ptr=%08x, size=%d)\n", ptr, size);
+  printf("(ptr=%p, size=%zu)\n", ptr, size);
 }
 
 void *allocPage(int pageSize) {
@@ -123,7 +123,7 @@ void *calloc(size_t nmemb, size_t size) {
   memset(memory, 0, nmemb * size);
 
   if(getenv("DEBUG_MALLOC")) {
-    printf("MALLOC: calloc(%ld, %ld)\t=> ", nmemb, size);
+    printf("MALLOC: calloc(%zu, %zu)\t=> ", nmemb, size);
     debugPointer(memory, block->size);
   }
   return memory;
@@ -134,7 +134,7 @@ void *malloc(size_t size) {
   void *memory = (void *) block + sizeof(Block);
 
   if(getenv("DEBUG_MALLOC")) {
-    printf("MALLOC: malloc(%ld)\t=> ", size);
+    printf("MALLOC: malloc(%zu)\t=> ", size);
     debugPointer(memory, block->size);
   }
   return memory;
@@ -170,7 +170,7 @@ void *realloc(void *ptr, size_t size) {
   }
 
   if(getenv("DEBUG_MALLOC")) {
-    printf("MALLOC: realloc(%08x, %ld)\t=> ", ptr, size);
+    printf("MALLOC: realloc(%p, %zu)\t=> ", ptr, size);
     debugPointer(memory, block->size);
   }
 
