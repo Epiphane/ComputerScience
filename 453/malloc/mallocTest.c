@@ -1,29 +1,28 @@
+#include <stdlib.h>
 #include <stdio.h>
-#include "malloc.h"
+#include <string.h>
+#include <unistd.h>
+#include "lib.h"
 
-typedef struct Object {
-  int x, y, z;
-  char letter;
-} Object;
+int main(int argc, char *argv[]){
+  unsigned char *val;
 
-typedef struct LargeObject {
-  char buffer[1024];
-} LargeObject;
+  val = malloc (1024);
+  if ( val )
+    printf("Calling malloc succeeded.\n");
+  else {
+    printf("malloc() returned NULL.\n");
+    exit(1);
+  }
 
-int main(int argc, char *argv[]) {
+  fill(val,1024,0);
+  printf("Successfully used the space.\n");
 
-  LargeObject *obj1 = malloc(sizeof(LargeObject));
-  Object *obj2 = malloc(sizeof(Object));
-  LargeObject *obj3 = malloc(sizeof(LargeObject));
-  Object *obj4 = malloc(sizeof(Object));
+  if ( check(val,1024,0) )
+    printf("Some values didn't match in region %p.\n",val);
 
-  free(obj4);
-  LargeObject *obj5 = malloc(sizeof(LargeObject));
+  free(val);
+  printf("We survived the free call.\n");
 
-  free(obj1);
-  free(obj2);
-  free(obj3);
-  free(obj5);
-
-  return 0;
+  exit(0);
 }

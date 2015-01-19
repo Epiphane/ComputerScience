@@ -9,10 +9,10 @@ LDFLAGS =
 intel-all: lib/libmalloc.so lib64/libmalloc.so
 
 lib/libmalloc.so: lib malloc32.o
-	$(CC) $(CFLAGS) -m32 -shared -o $@ malloc32.o
+	$(CC) $(CFLAGS) -m32 -shared -fPIC -o $@ malloc32.o
 
 lib64/libmalloc.so: lib64 malloc64.o
-	$(CC) $(CFLAGS) -shared -o $@ malloc64.o
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ malloc64.o
 
 lib:
 	mkdir lib
@@ -21,23 +21,20 @@ lib64:
 	mkdir lib64
 
 malloc32.o: malloc.c
-	$(CC) $(CFLAGS) -m32 -c -o malloc32.o malloc.c
+	$(CC) $(CFLAGS) -m32 -fPIC -c -o malloc32.o malloc.c
 
 malloc64.o: malloc.c
-	$(CC) $(CFLAGS) -m64 -c -o malloc64.o malloc.c
+	$(CC) $(CFLAGS) -fPIC -c -o malloc64.o malloc.c
 
-test: malloc.a mallocTest.o
-	$(LD) $(LDFLAGS) -o mallocTest mallocTest.o malloc.a
+test: lib/libmalloc.so
+	$(CC) $(CFLAGS) -m32 -o do_test prog.c lib.c -Llib -lmalloc
+	do_test
 
-mallocTest.o: mallocTest.c
-	$(CC) $(CFLAGS) -c -o mallocTest.o mallocTest.c
+test64: lib64/libmalloc.so
+	$(CC) $(CFLAGS) -o do_test64 prog.c lib.c -Llib64 -lmalloc
+	do_test64
 
-malloc.a: malloc.o
-	ar r malloc.a malloc.o
-
-malloc.so: malloc.o
-	$(CC) -shared -fpic -o malloc.so malloc.o
-
-malloc.o: malloc.c
-	$(CC) $(CFLAGS) -c -o malloc.o malloc.c
-
+clean: 
+	rm *.o
+	rm *.so
+	rm -r lib lib64

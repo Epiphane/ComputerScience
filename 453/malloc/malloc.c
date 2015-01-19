@@ -10,23 +10,26 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "malloc.h"
+
+// Default page size is 64kb
+#define PAGE_SIZE 64 * 1024
+// Pointers must line up mod 16
+#define ALIGNMENT 0xf
 
 typedef struct Block {
   size_t size;
   struct Block *next;
-  struct Block *prev;
 } Block;
 
 Block *firstBlock = NULL;
 void *heapEnd = NULL;
 
-// Default page size is 64kb
-const int PAGE_SIZE = 64 * 1024;
 
 void debugPointer(void *ptr, size_t size) {
-  printf("(ptr=%p, size=%zu)\n", ptr, size);
+  fprintf(stderr, "(ptr=%p, size=%zu)\n", ptr, size);
 }
 
 void *allocPage(int pageSize) {
@@ -71,21 +74,26 @@ Block *alloc(size_t size) {
     // Initialize first Block
     firstBlock->size = 0;
     firstBlock->next = NULL;
-    firstBlock->prev = NULL;
   }
 
   // Now, look through blocks for a space our size
   int foundSpot = 0;
-  while(cursor->next) {
+  while(cursor->next && !foundSpot) {
     // Attempt to place block after this one
     newBlock = (void *) cursor + sizeof(Block) + cursor->size;
+   
+    // Fix alignment
+    void *memory = (void *) newBlock + sizeof(Block);
+    if((long) memory & ALIGNMENT) {
+      memory = (void *) (((long) memory + ALIGNMENT) & ~ALIGNMENT);
+      newBlock = memory - sizeof(Block);
+    }
+
     if(newBlock + size < cursor->next) {
       newBlock->size = size;
 
-      newBlock->prev = cursor;
       newBlock->next = cursor->next;
       
-      cursor->next->prev = newBlock;
       cursor->next = newBlock;
       foundSpot = 1; // Mark that we're done!
     }
@@ -96,11 +104,15 @@ Block *alloc(size_t size) {
   if(!foundSpot) {
     // If we get here, no suitable space has been found. Stick it after the end
     cursor->next = newBlock = (void *) cursor + sizeof(Block) + cursor->size;
-    newBlock->size = size;
-    newBlock->prev = cursor;
-    newBlock->next = NULL;
 
-    while((void *) newBlock + newBlock->size > heapEnd) {
+    // Fix alignment
+    void *memory = (void *) newBlock + sizeof(Block);
+    if((long) memory & ALIGNMENT) {
+      memory = (void *) (((long) memory + ALIGNMENT) & ~ALIGNMENT);
+      cursor->next = newBlock = memory - sizeof(Block);
+    }
+   
+    while((void *) newBlock + size + sizeof(Block) >= heapEnd) {
       void *success = allocPage(PAGE_SIZE);
       if(success == NULL) {
         // If we had an issue, free all the pages we allocated for this
@@ -111,6 +123,9 @@ Block *alloc(size_t size) {
         return NULL;
       }
     }
+
+    newBlock->size = size;
+    newBlock->next = NULL;
   }
 
   return newBlock;
@@ -123,7 +138,7 @@ void *calloc(size_t nmemb, size_t size) {
   memset(memory, 0, nmemb * size);
 
   if(getenv("DEBUG_MALLOC")) {
-    printf("MALLOC: calloc(%zu, %zu)\t=> ", nmemb, size);
+    fprintf(stderr, "MALLOC: calloc(%zu, %zu)\t\t=> ", nmemb, size);
     debugPointer(memory, block->size);
   }
   return memory;
@@ -134,13 +149,20 @@ void *malloc(size_t size) {
   void *memory = (void *) block + sizeof(Block);
 
   if(getenv("DEBUG_MALLOC")) {
-    printf("MALLOC: malloc(%zu)\t=> ", size);
+    fprintf(stderr, "MALLOC: malloc(%zu)\t\t=> ", size);
     debugPointer(memory, block->size);
   }
   return memory;
 }
 
 void *realloc(void *ptr, size_t size) {
+  if(ptr == NULL) {
+    return malloc(size);
+  }
+  if(size == 0) {
+    free(ptr);
+  }
+
   // Pfft, you can't free before you even allocate anything!
   if(!firstBlock) {
     errno = EFAULT;
@@ -153,13 +175,16 @@ void *realloc(void *ptr, size_t size) {
 
   void *memory = ptr;
   // If we have space, just change the size
-  if(size <= oldSize || ptr + oldSize < block->next) {
+  if(size <= oldSize ||
+     (block->next == NULL && ptr + sizeof(Block) + oldSize < heapEnd) ||
+     (Block *) (ptr + sizeof(Block) + oldSize) < block->next) {
     block->size = size;
   }
   // Otherwise, we'll need a larger spot
   else {
     // Free my block
-    free(block);
+    free(ptr);
+    
     // Get new spot and copy data to it
     block = alloc(size);
     memory = (void *) block + sizeof(Block);
@@ -170,7 +195,7 @@ void *realloc(void *ptr, size_t size) {
   }
 
   if(getenv("DEBUG_MALLOC")) {
-    printf("MALLOC: realloc(%p, %zu)\t=> ", ptr, size);
+    fprintf(stderr, "MALLOC: realloc(%p, %zu)\t=> ", ptr, size);
     debugPointer(memory, block->size);
   }
 
@@ -178,6 +203,9 @@ void *realloc(void *ptr, size_t size) {
 }
 
 void free(void *ptr) {
+  if(ptr == NULL)
+    return;
+
   // Pfft, you can't free before you even allocate anything!
   if(!firstBlock) {
     errno = EFAULT;
@@ -187,11 +215,18 @@ void free(void *ptr) {
   // Set up a pointer to our data header
   Block *block = ptr - sizeof(Block);
 
-  // Erase me from everybody's memory
-  block->prev->next = block->next;
-  if(block->next)
-    block->next->prev = block->prev;
+  // Set up a cursor to look for this block (must have been alloced before)
+  Block *cursor = firstBlock;
+  while(cursor->next && cursor->next < block) {
+    cursor = cursor->next;
+  }
 
+  // Found our block
+  if(cursor->next == block) {
+    cursor->next = block->next;
+  }
+
+  // Erase me from everybody's memory
   if(getenv("DEBUG_MALLOC"))
-    printf("MALLOC: free(%08x)\n", ptr);
+    fprintf(stderr, "MALLOC: free(%p)\n", ptr);
 }
