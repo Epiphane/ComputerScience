@@ -24,14 +24,21 @@ typedef struct Block {
   struct Block *next;
 } Block;
 
+/* Globals keeping track of the start of the heap and the end */
 Block *firstBlock = NULL;
 void *heapEnd = NULL;
 
-
+/* Prints information about a pointer */
 void debugPointer(void *ptr, size_t size) {
   fprintf(stderr, "(ptr=%p, size=%zu)\n", ptr, size);
 }
 
+/*
+ * Allocated PAGE_SIZE more space from the heap, and returns a pointer
+ * to this new section of memory.
+ *
+ * Also updates heapEnd (global) to keep track of the new end of the heap.
+ */
 void *allocPage(int pageSize) {
   void *base = sbrk(pageSize);
 
@@ -46,6 +53,10 @@ void *allocPage(int pageSize) {
   return base;
 }
 
+/*
+ * Arbitrarily moves heapEnd. Useful for un-allocating heap space if malloc
+ * fails.
+ */
 void setHeapTo(void *_heapEnd) {
   brk(_heapEnd);
 
@@ -58,6 +69,14 @@ void setHeapTo(void *_heapEnd) {
 }
 
 /* Memory functions */
+/*
+ * The 'brains' behind malloc.
+ * Finds an unallocated space in the heap, allocates it, and returns
+ * a pointer to the head of the data Block.
+ *
+ * NOTE: This is not a pointer to the data itself. Functions that use this
+ * must be sure to increment by sizeof(Block) to get the data section.
+ */
 Block *alloc(size_t size) {
   Block *cursor = firstBlock;
   Block *newBlock;
@@ -131,6 +150,9 @@ Block *alloc(size_t size) {
   return newBlock;
 }
 
+/*
+ * Allocate space for n members of size size, and initialize space to 0
+ */
 void *calloc(size_t nmemb, size_t size) {
   Block *block = alloc(nmemb * size);
   void *memory = (void *) block + sizeof(Block);
@@ -144,6 +166,9 @@ void *calloc(size_t nmemb, size_t size) {
   return memory;
 }
 
+/*
+ * Allocate space (uninitialized)
+ */
 void *malloc(size_t size) {
   Block *block = alloc(size);
   void *memory = (void *) block + sizeof(Block);
@@ -155,6 +180,9 @@ void *malloc(size_t size) {
   return memory;
 }
 
+/*
+ * Given a pointer to data space, reallocate it to fit a different data size
+ */
 void *realloc(void *ptr, size_t size) {
   if(ptr == NULL) {
     return malloc(size);
@@ -202,6 +230,9 @@ void *realloc(void *ptr, size_t size) {
   return ptr;
 }
 
+/*
+ * Free allocated data
+ */
 void free(void *ptr) {
   if(ptr == NULL)
     return;

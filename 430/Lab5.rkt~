@@ -1,0 +1,4 @@
+#lang plai-typed
+
+;; What should this expression produce?
+((lambda (x) (+ x 2)) 3)

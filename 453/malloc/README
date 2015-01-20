@@ -1,0 +1,12 @@
+Assignment 1: malloc
+Thomas Steinke (tsteinke), CSC453
+
+To compile libmalloc.so and libmalloc.a, run `make` or `make malloc`.
+-> libmalloc.so and libmalloc.a will both be created in the current directory
+
+To compile 32- and 64-bit libraries for intel, run `make intel-all`
+-> libmalloc.so and libmalloc.a will be created in two directories:
+   1) lib/
+   2) lib64/
+
+   Each set is 32- and 64-bit, respectively.
