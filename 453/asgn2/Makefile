@@ -1,6 +1,5 @@
 #TESTING
-LWP	= 
-
+PLNICO	= libPLN.a
 
 CC 	= gcc
 
@@ -8,7 +7,7 @@ CFLAGS  = -Wall -g -I .
 
 LD 	= gcc
 
-LDFLAGS  = -Wall -g -L/home/pn-cs453/Given/Asgn2
+LDFLAGS  = -Wall -g -L.
 
 PUBFILES =  README  hungrymain.c  libPLN.a  libsnakes.a  lwp.h\
 	    numbersmain.c  snakemain.c  snakes.h
@@ -39,14 +38,14 @@ allclean: clean
 clean:	
 	rm -f $(OBJS) *~ TAGS
 
-snakes: snakemain.o libPLN.a libsnakes.a
-	$(LD) $(LDFLAGS) -o snakes snakemain.o $(LWP) -L. -lncurses -lsnakes -lPLN
+snakes: snakemain.o libPLN.a liblwp.so
+	$(LD) $(LDFLAGS) -o snakes snakemain.o -L. -lncurses -lsnakes -llwp $(PLNICO)
 
-hungry: hungrymain.o libPLN.a libsnakes.a
-	$(LD) $(LDFLAGS) -o hungry hungrymain.o $(LWP) -L. -lncurses -lsnakes -lPLN
+hungry: hungrymain.o libPLN.a liblwp.so
+	$(LD) $(LDFLAGS) -o hungry hungrymain.o -L. -lncurses -lsnakes -llwp $(PLNICO)
 
-nums: numbersmain.o libPLN.a 
-	$(LD) $(LDFLAGS) -o nums numbersmain.o $(LWP) -L. -lPLN
+nums: numbersmain.o libPLN.a liblwp.so
+	$(LD) $(LDFLAGS) -o nums numbersmain.o -L. -llwp $(PLNICO)
 
 hungrymain.o: lwp.h snakes.h
 
@@ -54,8 +53,11 @@ snakemain.o: lwp.h snakes.h
 
 numbermain.o: lwp.h
 
-#libPLN.a: ../Publish/lwp.c
-#	gcc -c ../Publish/lwp.c
+liblwp.so: lwp.c
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ lwp.c
+
+libPLN.a: lwp.c
+#	gcc -c lwp.c
 #	ar r libPLN.a lwp.o
 #	rm lwp.o
 
