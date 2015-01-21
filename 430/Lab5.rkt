@@ -49,10 +49,7 @@
 ;; a list of booleans indicating what query elements exist in source.
 (define (in-list-many? [src : (listof symbol)] [query : (listof symbol)])
   : (listof boolean)
-  (cond
-    [(empty? query) (list)]
-    [else (append (list (contains? src (first query)))
-                     (in-list-many? src (rest query)))]))
+  (map ((curry2 contains?) src) query))
 
 ;; Test cases
 (test (in-list-many? (list 'a 'd 'f) (list 'd 'e 'f)) (list #t #f #t))
