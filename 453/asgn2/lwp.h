@@ -9,6 +9,9 @@
 #define FALSE 0
 #endif
 
+#ifndef NULL
+#define NULL 0
+#endif
 
 #if defined(__x86_64)
 typedef struct registers {
