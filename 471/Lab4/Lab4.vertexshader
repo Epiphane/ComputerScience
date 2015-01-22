@@ -1,4 +1,8 @@
 #version 120
+
+// Same for all executions of shader
+uniform vec2 windowScale;
+
 // Input vertex data, different for all executions of this shader.
 attribute vec3 vertexPosition;
 attribute vec3 vertexColor;
@@ -7,7 +11,9 @@ varying vec3 fragmentColor;
 
 void main(){
 
-    gl_Position = vec4(vertexPosition, 1.0);
+    gl_Position = vec4(vertexPosition.x * windowScale.x,
+                       vertexPosition.y * windowScale.y,
+                       vertexPosition.z, 1.0);
 
     // Set the fragmemt color for the vertex shader
     fragmentColor = vertexColor;

@@ -1,5 +1,5 @@
 // Include standard headers
-#include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
 
 // Include GLEW
@@ -14,6 +14,10 @@ GLFWwindow* window;
 using namespace glm;
 
 #include "shader.hpp"
+
+void window_size_callback(GLFWwindow *window, int width, int height);
+
+int w_width, w_height;
 
 int main( void )
 {
@@ -30,13 +34,16 @@ int main( void )
     
     
     // Open a window and create its OpenGL context
-    window = glfwCreateWindow( 1024, 768, "Tutorial 02 - Red triangle", NULL, NULL);
+    w_width = 1024;
+    w_height = 768;
+    window = glfwCreateWindow( w_width, w_height, "Triangles of Doom", NULL, NULL);
     if( window == NULL ){
         fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwSetWindowSizeCallback(window, window_size_callback);
     
     // Initialize GLEW
     if (glewInit() != GLEW_OK) {
@@ -48,14 +55,18 @@ int main( void )
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     
     // Dark blue background
-    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     
     // Create and compile our GLSL program from the shaders
-    GLuint programID = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
+    GLuint programID = LoadShaders( "Lab4.vertexshader", "Lab4.fragmentshader" );
     
     // Get a handle for our buffers
-    GLuint vertexPositionID = glGetAttribLocation(programID, "vertexPosition");
-    GLuint vertexColorID    = glGetAttribLocation(programID, "vertexColor");
+    GLuint vertexPositionID = glGetAttribLocation (programID, "vertexPosition");
+    GLuint vertexColorID    = glGetAttribLocation (programID, "vertexColor");
+    GLuint windowScaleID    = glGetUniformLocation(programID, "windowScale");
+    GLuint windowCenterID   = glGetUniformLocation(programID, "windowCenter");
+    GLuint window_widthID   = glGetUniformLocation(programID, "w_width");
+    GLuint window_heightID  = glGetUniformLocation(programID, "w_height");
     
     static const GLfloat g_vertex_buffer_data[] = {
         -0.8f, -0.9f, 0.0f,
@@ -95,11 +106,6 @@ int main( void )
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
     
     do{
-        
-        //        for(int i = 0; i < 27; i ++) {
-        //            g_color_buffer_data[i] += 0.01f;
-        //        }
-        
         glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
         
@@ -108,6 +114,15 @@ int main( void )
         
         // Use our shader
         glUseProgram(programID);
+        
+        glUniform2f(windowCenterID, w_width / 2, w_height / 2);
+        if(w_width > w_height)
+            glUniform2f(windowScaleID, (float) w_height / w_width, 1);
+        else
+            glUniform2f(windowScaleID, 1, (float) w_width / w_height);
+        
+        glUniform1i(window_heightID, w_height);
+        glUniform1i(window_widthID, w_width);
         
         // First attribute buffer : vertices
         glEnableVertexAttribArray(vertexPositionID);
@@ -157,5 +172,10 @@ int main( void )
     glfwTerminate();
     
     return 0;
+}
+
+void window_size_callback(GLFWwindow *window, int width, int height) {
+    w_width = width;
+    w_height = height;
 }
 
