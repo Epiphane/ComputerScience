@@ -51,7 +51,7 @@ int main( void )
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
     
     // Create and compile our GLSL program from the shaders
-    GLuint programID = LoadShaders( "Lab3.vertexshader", "Lab3.fragmentshader" );
+    GLuint programID = LoadShaders( "VertexShader.glsl", "FragmentShader.glsl" );
     
     // Get a handle for our buffers
     GLuint vertexPositionID = glGetAttribLocation(programID, "vertexPosition");

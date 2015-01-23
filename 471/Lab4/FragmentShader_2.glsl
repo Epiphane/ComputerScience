@@ -7,6 +7,7 @@ uniform vec2 windowCenter;
 
 // Interpolated values from the vertex shaders
 varying vec3 fragmentColor;
+varying vec3 barycentric;
 
 void main()
 {
@@ -17,10 +18,5 @@ void main()
     float maxDist = min(w_width, w_height) / 2.15;
     vec4 fadeColor = vec4(1, 1, 1, 1);
     
-    if(gl_FragCoord.y > w_height / 2) {
-        gl_FragColor = mix(vec4(0, 0, 0.4, 1), fadeColor, dist / maxDist);
-    }
-    else {
-        gl_FragColor = mix(vec4(fragmentColor, 1), fadeColor, dist / maxDist);
-    }
+    gl_FragColor = mix(vec4(fragmentColor, 1), fadeColor, dist / maxDist);
 }

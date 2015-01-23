@@ -15,9 +15,11 @@ using namespace glm;
 
 #include "shader.hpp"
 
+void window_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 void window_size_callback(GLFWwindow *window, int width, int height);
 
 int w_width, w_height;
+GLuint program1, program2, program3, currentProgram;
 
 int main( void )
 {
@@ -44,6 +46,7 @@ int main( void )
     }
     glfwMakeContextCurrent(window);
     glfwSetWindowSizeCallback(window, window_size_callback);
+    glfwSetKeyCallback(window, window_key_callback);
     
     // Initialize GLEW
     if (glewInit() != GLEW_OK) {
@@ -58,15 +61,31 @@ int main( void )
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     
     // Create and compile our GLSL program from the shaders
-    GLuint programID = LoadShaders( "Lab4.vertexshader", "Lab4.fragmentshader" );
+    program1 = LoadShaders( "VertexShader.glsl", "FragmentShader_1.glsl" );
+    program2 = LoadShaders( "VertexShader.glsl", "FragmentShader_2.glsl" );
+    program3 = LoadShaders( "VertexShader.glsl", "FragmentShader_3.glsl" );
+    currentProgram = program1;
     
     // Get a handle for our buffers
-    GLuint vertexPositionID = glGetAttribLocation (programID, "vertexPosition");
-    GLuint vertexColorID    = glGetAttribLocation (programID, "vertexColor");
-    GLuint windowScaleID    = glGetUniformLocation(programID, "windowScale");
-    GLuint windowCenterID   = glGetUniformLocation(programID, "windowCenter");
-    GLuint window_widthID   = glGetUniformLocation(programID, "w_width");
-    GLuint window_heightID  = glGetUniformLocation(programID, "w_height");
+    GLuint p1_vertexPositionID    = glGetAttribLocation (program1, "vertexPosition");
+    GLuint p1_vertexColorID       = glGetAttribLocation (program1, "vertexColor");
+    GLuint p1_vertexBarycentricID = glGetAttribLocation (program1, "vertexBC");
+    GLuint p1_windowScaleID       = glGetUniformLocation(program1, "windowScale");
+    GLuint p1_window_widthID      = glGetUniformLocation(program1, "w_width");
+    GLuint p1_window_heightID     = glGetUniformLocation(program1, "w_height");
+    
+    GLuint p2_vertexPositionID    = glGetAttribLocation (program2, "vertexPosition");
+    GLuint p2_vertexColorID       = glGetAttribLocation (program2, "vertexColor");
+    GLuint p2_vertexBarycentricID = glGetAttribLocation (program2, "vertexBC");
+    GLuint p2_windowScaleID       = glGetUniformLocation(program2, "windowScale");
+    GLuint p2_window_widthID      = glGetUniformLocation(program2, "w_width");
+    GLuint p2_window_heightID     = glGetUniformLocation(program2, "w_height");
+    GLuint p2_windowCenterID      = glGetUniformLocation(program2, "windowCenter");
+    
+    GLuint p3_vertexPositionID    = glGetAttribLocation (program3, "vertexPosition");
+    GLuint p3_vertexColorID       = glGetAttribLocation (program3, "vertexColor");
+    GLuint p3_vertexBarycentricID = glGetAttribLocation (program3, "vertexBC");
+    GLuint p3_windowScaleID       = glGetUniformLocation(program3, "windowScale");
     
     static const GLfloat g_vertex_buffer_data[] = {
         -0.8f, -0.9f, 0.0f,
@@ -96,7 +115,21 @@ int main( void )
         0.0f, 0.0f, 1.0f,
     };
     
-    GLuint vertexBuffer, colorBuffer;
+    GLfloat g_barycentric_data[] = {
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f
+    };
+    
+    GLuint vertexBuffer, colorBuffer, barycentricBuffer;
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
@@ -105,24 +138,53 @@ int main( void )
     glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
     
+    glGenBuffers(1, &barycentricBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, barycentricBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_barycentric_data), g_barycentric_data, GL_STATIC_DRAW);
+    
     do{
-        glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-        
         // Clear the screen
         glClear( GL_COLOR_BUFFER_BIT );
         
-        // Use our shader
-        glUseProgram(programID);
+        // Use selected shader
+        glUseProgram(currentProgram);
         
-        glUniform2f(windowCenterID, w_width / 2, w_height / 2);
+        GLuint vertexPositionID, vertexColorID, vertexBarycentricID, windowScaleID;
+        if(currentProgram == program1) {
+            vertexPositionID = p1_vertexPositionID;
+            vertexColorID = p1_vertexColorID;
+            vertexBarycentricID = p1_vertexBarycentricID;
+            windowScaleID = p1_windowScaleID;
+            
+            // Set window size
+            glUniform1i(p1_window_heightID, w_height);
+            glUniform1i(p1_window_widthID, w_width);
+        }
+        else if(currentProgram == program2) {
+            vertexPositionID = p2_vertexPositionID;
+            vertexColorID = p2_vertexColorID;
+            vertexBarycentricID = p2_vertexBarycentricID;
+            windowScaleID = p2_windowScaleID;
+            
+            // Set window center
+            glUniform2f(p2_windowCenterID, w_width / 2, w_height / 2);
+            
+            // Set window size
+            glUniform1i(p2_window_heightID, w_height);
+            glUniform1i(p2_window_widthID, w_width);
+        }
+        else {
+            vertexPositionID = p3_vertexPositionID;
+            vertexColorID = p3_vertexColorID;
+            vertexBarycentricID = p3_vertexBarycentricID;
+            windowScaleID = p3_windowScaleID;
+        }
+        
+        // Set window scale
         if(w_width > w_height)
             glUniform2f(windowScaleID, (float) w_height / w_width, 1);
         else
             glUniform2f(windowScaleID, 1, (float) w_width / w_height);
-        
-        glUniform1i(window_heightID, w_height);
-        glUniform1i(window_widthID, w_width);
         
         // First attribute buffer : vertices
         glEnableVertexAttribArray(vertexPositionID);
@@ -148,11 +210,24 @@ int main( void )
                               (void*)0            // array buffer offset
                               );
         
+        // Second attribute buffer : vertices
+        glEnableVertexAttribArray(vertexBarycentricID);
+        glBindBuffer(GL_ARRAY_BUFFER, barycentricBuffer);
+        glVertexAttribPointer(
+                              vertexBarycentricID,// The attribute we want to configure
+                              3,                  // size
+                              GL_FLOAT,           // type
+                              GL_FALSE,           // normalized?
+                              0,                  // stride
+                              (void*)0            // array buffer offset
+                              );
+        
         // Draw the triangle !
         glDrawArrays(GL_TRIANGLES, 0, 9); // 3 indices starting at 0 -> 1 triangle
         
         glDisableVertexAttribArray(vertexPositionID);
         glDisableVertexAttribArray(vertexColorID);
+        glDisableVertexAttribArray(vertexBarycentricID);
         
         // Swap buffers
         glfwSwapBuffers(window);
@@ -166,7 +241,10 @@ int main( void )
     // Cleanup VBO
     glDeleteBuffers(1, &vertexBuffer);
     glDeleteBuffers(1, &colorBuffer);
-    glDeleteProgram(programID);
+    glDeleteBuffers(1, &barycentricBuffer);
+    glDeleteProgram(program1);
+    glDeleteProgram(program2);
+    glDeleteProgram(program3);
     
     // Close OpenGL window and terminate GLFW
     glfwTerminate();
@@ -179,3 +257,13 @@ void window_size_callback(GLFWwindow *window, int width, int height) {
     w_height = height;
 }
 
+void window_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    if(action == GLFW_RELEASE) {
+        if(currentProgram == program1)
+            currentProgram = program2;
+        else if(currentProgram == program2)
+            currentProgram = program3;
+        else
+            currentProgram = program1;
+    }
+}
