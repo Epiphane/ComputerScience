@@ -76,13 +76,15 @@
     [(equal? name (first fn-args)) (first args)]
     [else (subst-arg name (rest fn-args) (rest args))]))
 
-(define (subst [expr : ExprC] [fun-args : (listof symbol)] [args : (listof number)])
-  (type-case ExprC expr
-    [id (name) (subst-arg name fun-args args)]
-    [num (n : number)]
-    [binop (op : (number number -> number)) (l : ExprC) (r : ExprC)]
-    [if0 (test : ExprC) (then : ExprC) (else : ExprC)]
-    [app (fun : symbol) (args : (listof ExprC))]))
+(define (subst [expr : ExprC] [fun-args : (listof symbol)] [args : (listof number)]) : ExprC
+  (local [(define (recur e) (subst e fun-args args))]
+    (type-case ExprC expr
+      [id (name) (subst-arg name fun-args args)]
+      [num (n : number) expr]
+      [binop (op l r) (binop op (recur l) (recur r))]
+      [if0 (test success fail)
+           (if0 (recur test) (recur success) (recur fail))]
+      [app (fun args) (app fun args)])))
 
 (define (find-function [f : symbol] [funs : (listof FundefC)]) : FundefC
   (cond [(empty? funs) (error 'find-function "No function with that name")]
@@ -100,56 +102,20 @@
       [if0 (test success fail) (cond
                                  [(equal? (recur test) 0) (recur success)]
                                  [else (recur fail)])]
-      [app (fun args)
-           (recur (subst fun args))])))
+      [app (name args)
+           (let [(fun (find-function name))]
+             (recur (subst (fdC-body fun) (fdC-args fun) args)))])))
 
 (define (top-eval [s : s-expression] [fun-sexps : (listof s-expression)])
   : number
   (eval (parse s) (map parse-fundef fun-sexps)))
 
+;; Test-cases
+(define square `(fn square (x) (* x x)))
+
+(test (top-eval `(if0 (- 10 10) (square 2) 5) (list square)) 4)
 
 #|
-
-;; Expression representation
-(define-type ExprC
-  [numC (n : number)]
-  [plusC (l : ExprC) (r : ExprC)]
-  [multC (l : ExprC) (r : ExprC)]
-  <idC-def>
-  <app-def>)
-
-
-;; Test cases
-|#
-
-
-#|;; Evaluation for ArithC Expressions
-(define (eval [exp : ExprC]) : number
-  (type-case ExprC exp
-    [numC (n) n]
-    [plusC (l r) (+ (eval l) (eval r))]
-    [multC (l r) (* (eval l) (eval r))]))
-
-;; Takes an AE and returns how many numbers it contains
-(define (num-nums [exp : ExprC]) : number
-  (type-case ExprC exp
-    [numC (n) 1]
-    [plusC (l r) (+ (num-nums l) (num-nums r))]
-    [multC (l r) (+ (num-nums l) (num-nums r))]))
-
-;; Test cases
-(test (num-nums (plusC (numC 10) (multC (numC 5) (plusC (numC 3) (numC 3))))) 4)
-
-;; Test cases
-(test/exn (parse '(4)) "invalid list input")
-(test (parse '(+ 4 (* (- 3 (- 4)) 2))) (plusC (numC 4)
-                                                 (multC (plusC (numC 3) 
-                                                        (multC (numC -1)
-                                                               (multC (numC -1) (numC 4))))
-                                                        (numC 2))))
-
-;; Parse and eval a s-exp
-(define (parse-eval [expr : s-expression]) (eval (parse expr)))
 
 ;; Test cases
 (test (parse-eval '(+ 4 (* (- 3 (- 4)) 2))) 18)
