@@ -22,7 +22,7 @@ HUNGRYOBJS = hungrymain.o
 
 NUMOBJS    = numbersmain.o
 
-OBJS	= $(SNAKEOBJS) $(HUNGRYOBJS) $(NUMOBJS) 
+OBJS	= $(SNAKEOBJS) $(HUNGRYOBJS) $(NUMOBJS) liblwp.so
 
 SRCS	= snakemain.c numbersmain.c
 
