@@ -8,11 +8,28 @@
  */
 
 #include "lwp.h"
+#include <stdlib.h>
+#include <stdio.h>
 
-scheduler currentScheduler;
+void RoundRobin_init() {}
+void RoundRobin_shutdown() {}
+void RoundRobin_admit(thread new) {
+   printf("WHAT");
+}
+
+void RoundRobin_remove(thread victim) {
+
+}
+
+tid_t RoundRobin_next() {
+   return 0;
+}
+
+scheduler RoundRobin;
+scheduler currentScheduler = NULL;
 
 /* Given a thread id, fetch a pointer to its context */
-thread *getThread(tid_t target) {
+thread getThread(tid_t target) {
    thread cursor = lwp_tlist;  // Cursor for moving through list
 
    // Check each thread
@@ -49,6 +66,16 @@ tid_t lwp_create(lwpfun function, void *argument, size_t stacksize) {
    // Add it to list
    thread->tlist_next = lwp_tlist;
    lwp_tlist = thread;
+
+   // Add it to scheduler
+   if(!currentScheduler) {
+      currentScheduler = RoundRobin = calloc(1, sizeof(RoundRobin));
+      RoundRobin->admit = &RoundRobin_admit;
+      RoundRobin->remove = &RoundRobin_remove;
+      RoundRobin->next = &RoundRobin_next;
+   }
+
+   currentScheduler->admit(thread);
 
    return thread->tid;
 }
@@ -91,6 +118,8 @@ void lwp_stop();
  * If scheduler is NULL or has never been set, default to round robin
  */
 void lwp_set_scheduler(scheduler newScheduler) {
+   printf("ohmy\n");
+
    newScheduler->init();
 
    tid_t child_tid = currentScheduler->next();
