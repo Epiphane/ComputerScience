@@ -1,5 +1,5 @@
 #TESTING
-PLNICO	= libPLN.a
+PLNICO	= 
 LWPO = 
 
 CC 	= gcc
@@ -31,7 +31,9 @@ HDRS	=
 
 EXTRACLEAN = core $(PROGS)
 
-all: 	$(PROGS)
+all: 	liblwp.so
+
+progs:  $(PROGS)
 
 allclean: clean
 	@rm -f $(EXTRACLEAN)
@@ -39,13 +41,13 @@ allclean: clean
 clean:	
 	rm -f $(OBJS) *~ TAGS
 
-snakes: snakemain.o libPLN.a liblwp.a
+snakes: snakemain.o libPLN.a liblwp.so
 	$(LD) $(LDFLAGS) -o snakes snakemain.o $(LWPO) -L. -lncurses -lsnakes -llwp $(PLNICO)
 
-hungry: hungrymain.o libPLN.a liblwp.a
+hungry: hungrymain.o libPLN.a liblwp.so
 	$(LD) $(LDFLAGS) -o hungry hungrymain.o $(LWPO) -L. -lncurses -lsnakes -llwp $(PLNICO)
 
-nums: numbersmain.o libPLN.a liblwp.a
+nums: numbersmain.o libPLN.a liblwp.so
 	$(LD) $(LDFLAGS) -o nums numbersmain.o $(LWPO) -L. -llwp $(PLNICO)
 
 hungrymain.o: lwp.h snakes.h
@@ -55,7 +57,7 @@ snakemain.o: lwp.h snakes.h
 numbermain.o: lwp.h
 
 liblwp.so: lwp.o
-	$(CC) $(CFLAGS) -fPIC -shared -o $@ lwp.c
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ lwp.c magic64.s
 
 lwp.o: lwp.c
 	$(CC) $(CFLAGS) -c lwp.c

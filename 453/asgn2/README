@@ -1,0 +1,8 @@
+liblwp.so
+By Thomas Steinke (tsteinke)
+CPE 453
+
+To run all programs (snake, nums, hungry), type `make progs`.
+
+To compile liblwp.so, run `make` or `make all` or `make liblwp.so`.
+ 
