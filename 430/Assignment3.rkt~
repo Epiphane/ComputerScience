@@ -1,0 +1,33 @@
+#lang plai-typed
+
+;; Gucci Lang v3
+;; EBNF Specification:
+;; GUCI3 = num
+;;       | true/false
+;;       | id
+;;       | (if GUCI3 GUCI3 GUCI3)
+;;       | (with (id = GUCI3) ... GUCI3)
+;;       | (fn (id ...) GUCI3)
+;;       | (operator GUCI3 GUCI3
+;;       | (GUCI3 GUCI3 ...)
+;; operator = +, -, *, /, eq?, <=
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Parsing
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Represents an environment
+(define-type-alias Environment (hashof symbol Val))
+
+;; the empty environment
+(define empty-env (hash (list)))
+
+;; Represents a value
+(define-type Val
+  [num (n : number)]
+  [id (i : symbol)]
+  [bool (b : boolean)])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Evaluation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

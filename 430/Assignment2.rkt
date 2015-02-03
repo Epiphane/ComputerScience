@@ -171,30 +171,3 @@
 (test-eval `(/ 10 (- 20 15)) 2)
 (test-eval `(double 4) 8)
 (test-eval `(if0 (double 2) 10 -1) -1)
-
-#|
-
-;; Test cases
-(test (parse-eval '(+ 4 (* (- 3 (- 4)) 2))) 18)
-
-;; Forms a list by applying a given function twice to each element of a list
-(define (doublemap fn my-list)
-  (map fn (map fn my-list)))
-
-;; Test cases
-(define (test-fn [n : number]) (* n 3))
-(test (doublemap test-fn (list 3 4 5)) (list 27 36 45))
-
-;; Consumes two lists of the same length and returns a list of lists
-;; Where each element contains corresponding elements
-(define (zip list1 list2)
-  (cond
-    [(empty? list1) empty]
-    [else (cons (list (first list1) (first list2)) (zip (rest list1) (rest list2)))]))
-
-;; Test cases
-(test (zip (list 'a 'b 'c) (list 'd 'e 'f)) (list (list 'a 'd) (list 'b 'e) (list 'c 'f)))
-
-;; Test cases
-(test (top-eval `(+ 4 (square 3)) (list `{fn square (x) (* x x)})) 
-      13)|#

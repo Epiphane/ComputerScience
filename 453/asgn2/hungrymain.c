@@ -64,6 +64,7 @@ int main(int argc, char *argv[]){
   cnt = 0;
   /* snake new_snake(int y, int x, int len, int dir, int color) ;*/
 
+for(i = 0; i < 10; i ++) {
   s[cnt++] = new_snake( 8,30,10, E,1);/* each starts a different color */
   s[cnt++] = new_snake(10,30,10, E,2);
   s[cnt++] = new_snake(12,30,10, E,3);
@@ -71,7 +72,7 @@ int main(int argc, char *argv[]){
   s[cnt++] = new_snake(10,50,10, W,5);
   s[cnt++] = new_snake(12,50,10, W,6);
   s[cnt++] = new_snake( 4,40,10, S,7);
-
+}
   /* Draw each snake */
   draw_all_snakes();
 

@@ -1,35 +1,58 @@
 #lang plai-typed
 
-;; Assignment 2
-;; Gucci Lang
-
 (print-only-errors #t)
 (require plai-typed/s-exp-match)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Parsing
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Gucci Lang v3
+;; EBNF Specification:
+;; GUCI3 = num
+;;       | true/false
+;;       | id
+;;       | (if GUCI3 GUCI3 GUCI3)
+;;       | (with (id = GUCI3) ... GUCI3)
+;;       | (fn (id ...) GUCI3)
+;;       | (operator GUCI3 GUCI3
+;;       | (GUCI3 GUCI3 ...)
+;; operator = +, -, *, /, eq?, <=
 
-;; Represents any binary arithmetic operator
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Types
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Represents an environment
+(define-type-alias Environment (hashof symbol Val))
+
+;; the empty environment
+(define empty-env (hash (list)))
+
+;; Represents a value
+(define-type Value
+  [num (n : number)]
+  [id (i : symbol)]
+  [bool (b : boolean)])
+
+;; Represents an expression
+(define-type ExprC
+  [idC (n : symbol)]
+  [numC (n : number)]
+  [binop (op : (number number -> number)) (l : ExprC) (r : ExprC)]
+  [if0 (cond : ExprC) (success : ExprC) (fail : ExprC)]
+  [appC (fun : symbol) (args : (listof ExprC))])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Parsing
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Returns a supported binary arithmetic operator
 (define (binary-op [type : s-expression]) : (optionof (number number -> number))
   (cond 
     [(equal? type `+) (some +)]
     [(equal? type `-) (some -)]
     [(equal? type `*) (some *)]
     [(equal? type `/) (some /)]
+    [(equal? type `eq?) (some equal?)]
+    [(equal? type `<=) (some <=)]
     [else (none)]))
-
-;; Represents an expression
-(define-type ExprC
-  [id (n : symbol)]
-  [num (n : number)]
-  [binop (op : (number number -> number)) (l : ExprC) (r : ExprC)]
-  [if0 (cond : ExprC) (success : ExprC) (fail : ExprC)]
-  [app (fun : symbol) (args : (listof ExprC))])
-
-;; Function definition
-(define-type FundefC
-  [fdC (name : symbol) (args : (listof symbol)) (body : ExprC)])
 
 ;; Gucci Lang Parser
 (define (parse [expr : s-expression]) : ExprC
@@ -54,31 +77,13 @@
        [none () (cond 
                   [(equal? (first (s-exp->list expr)) `if0)
                    (error 'parse "Bad if0 form")]
-                  [else (app (s-exp->symbol (first (s-exp->list expr)))
+                  [else (appC (s-exp->symbol (first (s-exp->list expr)))
                              (map (lambda (arg) (parse arg)) (rest (s-exp->list expr))))])])]
     [else (error 'parse "Invalid list input")]))
-
-;; Converts an s-expression into a list of symbols
-(define (s-exp->listofsymbol [expr : s-expression]) : (listof symbol)
-  (map (lambda (piece) (s-exp->symbol piece)) (s-exp->list expr)))
-
-;; Gucci Function Parser
-(define (parse-fundef[expr : s-expression]) : FundefC
-  (cond
-    [(s-exp-match? `(fn SYMBOL (SYMBOL ...) ANY) expr)
-     (let [(parts (s-exp->list expr))]
-       (type-case (optionof (number number -> number)) (binary-op (second parts))
-         [some (fun) (error 'parse "No binary operations!")]
-         [none () 
-               (fdC (s-exp->symbol (second parts))
-                    (s-exp->listofsymbol (third parts))
-                    (parse (fourth parts)))]))]
-    [else (error 'parse-fundef "Invalid function form")]))
 
 ;; Test cases
 (test/exn (parse `if0) "Bad if0 form")
 (test/exn (parse `(if0 1)) "Bad if0 form")
-(test/exn (parse-fundef `(fn + (a b) (+ a b))) "No binary operations!")
 (test/exn (parse `(+ / 2)) "Invalid binary operation")
 (test/exn (parse `(+ 10 2 3)) "Incorrect number of arguments")
 (test (parse `(+ 10 2)) (binop + (num 10) (num 2)))
@@ -89,14 +94,10 @@
                                                      (num -1))))
 (test (parse `(if0 (- 10 10) a b)) (if0 (binop - (num 10) (num 10)) (id 'a) (id 'b)))
 (test/exn (parse `(10 10 10)) "Invalid list input")
-(test (parse-fundef `(fn square (x) (* x x))) (fdC 'square 
-                                                   (list 'x)
-                                                   (binop * (id 'x) (id 'x))))
-(test/exn (parse-fundef `(square (x y) (10 * x))) "Invalid function form")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Evaluating
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Evaluation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (subst-arg [name : symbol] [fn-args : (listof symbol)] [args : (listof number)]) : ExprC
   (cond
@@ -110,12 +111,12 @@
     [(equal? (length fun-args) (length args))
      (local [(define (recur e) (subst e fun-args args))]
        (type-case ExprC expr
-         [id (name) (subst-arg name fun-args args)]
-         [num (n) expr]
+         [idC (name) (subst-arg name fun-args args)]
+         [numC (n) expr]
          [binop (op l r) (binop op (recur l) (recur r))]
          [if0 (test success fail)
               (if0 (recur test) (recur success) (recur fail))]
-         [app (fun args) (app fun (map recur args))]))]
+         [appC (fun args) (app fun (map recur args))]))]
     [else (error 'eval "Incorrect number of arguments")]))
 
 (define (find-function [f : symbol] [funs : (listof FundefC)]) : FundefC
@@ -143,17 +144,26 @@
   (eval (parse s) (map parse-fundef fun-sexps)))
 
 ;; Test-cases
+(define (test-eval [expr : s-expression] [res : Val])
+  (test (top-eval expr funs) res))
+(define (test-eval/exn [expr : s-expression] [err : string])
+  (test/exn (top-eval expr funs) err))
+
+;; Basic EBNF Tests
+(test-eval `(if (eq? (- 10 5) 5) ab cd) (id ab))
+(test-eval `(with (fun = (fn (a b) (* a b)))
+                  (val = 10)
+                  (fun val 7)) (num 70))
+(test-eval `(with (val = (if (<= (/ 9 3) (+ 1 1)) false true))
+                  (val)) (bool false))
+
+;; Exception testing
 (define funs (list
               `(fn six () 6)
               `(fn double (x) (* 2 x))
               `(fn if1 (x a b) (if0 (- x 1) a b))
               `(fn double2 (x a b) (if0 (- (double x) 2) a b))
               `(fn bad-fn (x) (* x y))))
-
-(define (test-eval [expr : s-expression] [res : number])
-  (test (top-eval expr funs) res))
-(define (test-eval/exn [expr : s-expression] [err : string])
-  (test/exn (top-eval expr funs) err))
 
 (test-eval `(six) 6)
 (test-eval `(if0 (- 10 10) (double 2) 5) 4)
@@ -163,38 +173,3 @@
 (test-eval/exn `(missing-fn a b) "No function with that name")
 (test-eval `(if1 (+ (- 0 3) 4) 10 9) 10)
 (test-eval `(double2 1 10 9) 10)
-
-;; EBNF Test
-(test-eval `10 10)
-(test-eval `(+ 10 20) 30)
-(test-eval `(* 10 20) 200)
-(test-eval `(/ 10 (- 20 15)) 2)
-(test-eval `(double 4) 8)
-(test-eval `(if0 (double 2) 10 -1) -1)
-
-#|
-
-;; Test cases
-(test (parse-eval '(+ 4 (* (- 3 (- 4)) 2))) 18)
-
-;; Forms a list by applying a given function twice to each element of a list
-(define (doublemap fn my-list)
-  (map fn (map fn my-list)))
-
-;; Test cases
-(define (test-fn [n : number]) (* n 3))
-(test (doublemap test-fn (list 3 4 5)) (list 27 36 45))
-
-;; Consumes two lists of the same length and returns a list of lists
-;; Where each element contains corresponding elements
-(define (zip list1 list2)
-  (cond
-    [(empty? list1) empty]
-    [else (cons (list (first list1) (first list2)) (zip (rest list1) (rest list2)))]))
-
-;; Test cases
-(test (zip (list 'a 'b 'c) (list 'd 'e 'f)) (list (list 'a 'd) (list 'b 'e) (list 'c 'f)))
-
-;; Test cases
-(test (top-eval `(+ 4 (square 3)) (list `{fn square (x) (* x x)})) 
-      13)|#

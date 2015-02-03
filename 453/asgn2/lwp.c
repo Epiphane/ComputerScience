@@ -155,11 +155,18 @@ void lwp_yield() {
  * Terminates the current LWP and frees its resources. Calls sched->next()
  * to get the next thread. If no other threads, calls lwp_stop();
  */
+rfile mainThread;
 void lwp_exit_real(thread old) {
    // Free the old stack
    free(old->stack);
    free(old);
-   load_context(&currentThread->state);
+
+   if(!lwp_tlist) // No threads
+      lwp_stop();
+   else { // More threads
+      SetSP(currentThread->state.rsp);
+      load_context(&currentThread->state);
+   }
 }
 
 void lwp_exit() {
@@ -168,18 +175,15 @@ void lwp_exit() {
    // Get new thread from scheduler
    currentThread = getThread(currentScheduler->next());
    currentScheduler->remove(victim);
-  
-   if(!lwp_tlist) // No threads
-      lwp_stop();
-   else // More threads
-      lwp_exit_real(victim);
+ 
+   SetSP(mainThread.rsp);
+   lwp_exit_real(victim); 
 }
 
 /*
  * Starts the LWP system. Saves the original context, picks an LWP, and starts
  * it. If no LWPs, returns immediately.
  */
-rfile mainThread;
 void lwp_start() {
    if(lwp_tlist) {
       // Save original
