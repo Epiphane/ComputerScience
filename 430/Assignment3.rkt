@@ -49,13 +49,16 @@
   (type-case Value val
     [num (n) (to-string n)]
     [id (i) (symbol->string i)]
-    [bool (b) (to-string b)]
+    [bool (b) (cond
+                [b "true"]
+                [else "false"])]
     [clos (a b e) "#<procedure>"]))
 
 ;; Test cases
 (test (serialize (num 32)) "32")
 (test (serialize (id 'abc)) "abc")
-(test (serialize (bool false)) "#f")
+(test (serialize (bool true)) "true")
+(test (serialize (bool false)) "false")
 (test (serialize (clos (list 'a) (binop + (val (num 5)) (val (num 2))) empty-env)) "#<procedure>")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -227,8 +230,8 @@
         [appC (func args)
               (local [(define fun (interp func env))]
                 (type-case Value fun
-                  [clos (arguments body env)
-                       (interp body (env-vars arguments args env env))]
+                  [clos (arguments body clos-env)
+                       (interp body (env-vars arguments args env clos-env))]
                   [else (error 'interp "Application of number or boolean")]))]))))
 
 (define (top-eval [s : s-expression]) : string
@@ -247,19 +250,19 @@
 
 ;; Basic EBNF Tests
 (test-interp `(if (eq? (- 10 5) 5) 10 11) (num 10))
-(test-interp `(with (fun = (fn (a b) (* a b)))
-                    (val = 10)
+(test-interp `(with (val = 10)
+                    (fun = (fn (a b) (* a b)))
                     (fun val 7)) (num 70))
 (test-interp `(with (val = (if (<= (/ 9 3) (+ 1 1)) 10 11))
                     val) (num 11))
 (test-interp `(a*2b 10 3) (num 60))
-(test-interp `((fn (seven) (seven)) 
-               ((fn (minus) (fn () (minus (+ 3 10) (* 2 3)))) 
+(test-interp `((fn (seven) (seven))
+               ((fn (minus) (fn () (minus (+ 3 10) (* 2 3))))
                 (fn (x y) (+ x (* -1 y))))) (num 7))
 
 ;; Exception testing
-(test-interp/exn `(with (val = (if (<= (/ 9 3) (+ 1 1)) 10 11))
-                    (val)) "Application of number or boolean")
+(test-interp/exn `(with (res = (if (<= (/ 9 3) (+ 1 1)) 10 11))
+                    (res)) "Application of number or boolean")
 (test/exn (interp (appC (val (num 10)) (list (val (num 12)))) test-env)
           "Application of number or boolean")
 (test-interp/exn `(/ 12 0) "Division by zero")

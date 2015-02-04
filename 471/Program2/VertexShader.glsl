@@ -1,4 +1,9 @@
 #version 120
+
+// Same for all executions of shader
+uniform vec2 windowScale;
+uniform vec2 windowCenter;
+
 // Input vertex data, different for all executions of this shader.
 attribute vec3 vertexPosition;
 
@@ -9,12 +14,19 @@ uniform float speed;
 
 void main() {
     
-//    float distFromCircle = distance(vertexPosition, circle) - radius;
-    float movement = clamp(time * speed, 0, length(vertexPosition) - radius);
-//    movement = 0;
+    float maxDist = length(vertexPosition) - radius;
+    float movement = clamp(time * speed, 0, maxDist);
+    //movement = mod(time * speed, maxDist * 2);
+    //if(movement > maxDist) {
+    //    movement = maxDist - (movement - maxDist);
+    //}
     
-    gl_Position = vec4(vertexPosition, 1.0);
-    gl_Position = vec4(vertexPosition + movement * -normalize(vertexPosition), 1.0);
-    gl_PointSize = 20;
+    vec3 position = vec3(vertexPosition + movement * -normalize(vertexPosition));
+    
+    gl_Position = vec4(position.x * windowScale.x,
+                       position.y * windowScale.y,
+                       position.z, 1.0);
+    
+    gl_PointSize = 2;
 }
 
