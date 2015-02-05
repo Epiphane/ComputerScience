@@ -1,0 +1,20 @@
+#lang plai-typed
+
+;; Represents a value
+(define-type Value
+  [num (n : number)]
+  [id (i : symbol)]
+  [bool (b : boolean)]
+  [clos (args : (listof symbol)) (body : ExprC) (env : Environment)])
+
+;; Represents an expression
+(define-type ExprC
+  [val (v : Value)]
+  [ifop (op : (number number -> boolean)) (l : ExprC) (r : ExprC)]
+  [binop (op : (number number -> number)) (l : ExprC) (r : ExprC)]
+  [ifC (cond : ExprC) (success : ExprC) (fail : ExprC)]
+  [appC (fun : ExprC) (args : (listof ExprC))]
+  [lam (args : (listof symbol)) (body : ExprC)])
+
+;; Represents an environment
+(define-type-alias Environment (hashof symbol Value))
