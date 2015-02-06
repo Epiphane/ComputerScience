@@ -22,11 +22,11 @@
 
 ;; Represents an environment
 (define-type-alias Environment (hashof symbol Value))
-(define empty-env (hash (list)))
+(define empty-env (hash (list (values 'a (num 2)))))
 
 ;; Random containment
 (define symbol-set (list 'a 'b 'c 'd 'x 'y 'z 'w))
-(define max-rand-number 100)
+(define max-rand-number 2)
 
 ;; Function to pick a random symbol
 (define next-sym?
@@ -37,9 +37,6 @@
          [else ((next-sym? (rest symbols)))]))))
 (define randomSymbol (next-sym? symbol-set))
 
-;; Test case...?
-(randomSymbol)
-
 (define randomBaseTerm
   (lambda ()
     (let [(rand (random 3))]
@@ -47,11 +44,6 @@
         [(equal? rand 0) (val (num (random max-rand-number)))]
         [(equal? rand 1) (val (id (randomSymbol)))]
         [else (val (bool (equal? (random 2) 1)))]))))
-
-(randomBaseTerm)
-(randomBaseTerm)
-(randomBaseTerm)
-(randomBaseTerm)
 
 (define random-ifop
   (lambda () (if (equal? (random 2) 1)
@@ -96,9 +88,6 @@
                                          (random-arg-list (- depth 1) 3))]
                 [(equal? option 7) (lam (random-symbol-list 3)
                                         (randomTerm (- depth 1)))]))])))
-
-(randomTerm 20)
-(randomTerm 20)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Evaluation (Assignment 3)
@@ -155,7 +144,19 @@
                        (eval body (env-vars arguments args env env))]
                   [else (error 'eval "Application of number or boolean")]))]))))
 
-(eval (randomTerm 3) empty-env)
-(eval (randomTerm 3) empty-env)
-(eval (randomTerm 3) empty-env)
-(eval (randomTerm 3) empty-env)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; End Assignment 3
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Runs a number of trials randomly
+(define (runtrials [trials : number] [depth : number])
+  (local [(define (runtrial [trial : number])
+          (cond
+            [(equal? trial 0) 0.0]
+            [else (try (begin
+                         (eval (randomTerm depth) empty-env)
+                         (+ (runtrial (- trial 1)) 1))
+                       (lambda () (runtrial (- trial 1))))]))]
+    (/ (runtrial trials) trials)))
+
+(runtrials 1000 1)
