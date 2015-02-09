@@ -15,10 +15,15 @@
 #include <time.h>
 #include <limits.h>
 
+#define NO_FORK -1
+
 #define NUM_PHILOSOPHERS 5
-#define NONE 0
+#define CHANGING 0
 #define EAT 1
 #define THINK 2
+
+#define FALSE 0
+#define TRUE 1
 
 // Width of a print: | ----- Think (14)
 #define SECTION_WIDTH 14
@@ -29,25 +34,33 @@ void print_philosophers();
 void print_line();
 
 typedef struct Philosopher {
-   int left, right, state;
+   int first, second, state, isHungry;
 } Philosopher;
 
 Philosopher philosophers[NUM_PHILOSOPHERS];
 pthread_mutex_t forks[NUM_PHILOSOPHERS];
 pthread_mutex_t printing;
 
-void lock_printing() {
-   if(pthread_mutex_lock(&printing) != 0) {
+void lock(void *key) {
+   if(pthread_mutex_lock(key) != 0) {
       fprintf(stderr, "Locking printer: %s\n", strerror(errno));
       exit(-1);
    }
 }
 
-void unlock_printing() {
-   if(pthread_mutex_unlock(&printing) != 0) {
+void unlock(void *key) {
+   if(pthread_mutex_unlock(key) != 0) {
       fprintf(stderr, "Unlocking printer: %s\n", strerror(errno));
       exit(-1);
    }
+}
+
+void lock_printing() {
+   lock(&printing);
+}
+
+void unlock_printing() {
+   unlock(&printing);
 }
 
 int main(int argc, char *argv[]) {
@@ -55,6 +68,12 @@ int main(int argc, char *argv[]) {
 
    int         id[NUM_PHILOSOPHERS]; // Individual identifier
    pthread_t   childid[NUM_PHILOSOPHERS]; // Activations for each child
+
+   // Optional command line argument
+   int howManyDinners = 1;
+   if(argc > 1) {
+      sscanf(argv[1], " %d", &howManyDinners);
+   }
 
    // Initialize mutex on printing
    if(pthread_mutex_init(&printing, NULL) != 0) {
@@ -66,8 +85,9 @@ int main(int argc, char *argv[]) {
    // and the fork on their "left"
    for(i = 0; i < NUM_PHILOSOPHERS; i ++) {
       id[i] = i;
-      philosophers[i].left = philosophers[i].right = 0;
-      philosophers[i].state = NONE;
+      philosophers[i].first = philosophers[i].second = NO_FORK;;
+      philosophers[i].state = CHANGING;
+      philosophers[i].isHungry = howManyDinners;
 
       if(pthread_mutex_init(&forks[i], NULL) != 0) {
          fprintf(stderr, "Fork %d: %s\n", i, strerror(errno));
@@ -84,6 +104,7 @@ int main(int argc, char *argv[]) {
    } 
    printf("|\n");
    print_line();
+   print_philosophers();
    unlock_printing();
 
    for(i = 0; i < NUM_PHILOSOPHERS; i ++) {
@@ -102,7 +123,6 @@ int main(int argc, char *argv[]) {
    // Wait for all children to finish
    for(i = 0; i < NUM_PHILOSOPHERS; i ++) {
       pthread_join(childid[i], NULL);
-      printf("Parent: child %d exited.\n", i);
    }
 
    // Put away all the forks
@@ -112,6 +132,11 @@ int main(int argc, char *argv[]) {
          exit(-1);
       }
    }
+
+   // Output the head of the page
+   lock_printing();
+   print_line();
+   unlock_printing();
 
    return 0;
 }
@@ -133,15 +158,15 @@ void print_philosophers() {
       
       // Print forks
       for(j = 0; j < NUM_PHILOSOPHERS; j ++) {
-         if((j == i      && philosophers[i].left) ||
-            (j == i + 1  && philosophers[i].right)) {
+         if((j == philosophers[i].first) ||
+            (j == philosophers[i].second)) {
             printf("%d", j);
          }
          else
             printf("-");
       }
 
-      if(philosophers[i].state == NONE)
+      if(philosophers[i].state == CHANGING)
          printf("       ");
       else if(philosophers[i].state == EAT)
          printf(" Eat   ");
@@ -158,10 +183,82 @@ void print_philosophers() {
  * INPUT: Pointer to an integer, its ID.
  */
 void *philosopher(void *id) {
-   int whoami = *(int *)id;
+   int me = *(int *)id;
 
-   printf("Child %d (%d):    Hello. \n", whoami, (int) getpid());
-   printf("Child %d (%d):    Goodbye. \n\n", whoami, (int) getpid());
+   // Grab with the left hand first, then the right
+   int first = me;
+   int second = me + 1;
+   if(second == NUM_PHILOSOPHERS)
+      second = 0;
+
+   // If you're an odd number, grab with your right hand first
+   if(me % 2) {
+      first = second;
+      second = me;
+   }
+
+   // I'm hungry!
+   while(philosophers[me].isHungry > 0) {
+      // Grab first fork
+      lock(&forks[first]);
+      lock_printing();
+      philosophers[me].first = first;
+      print_philosophers();
+      unlock_printing();
+
+      // Grab second fork
+      lock(&forks[second]);
+      lock_printing();
+      philosophers[me].second = second;
+      print_philosophers();
+      unlock_printing();
+
+      // Start eating
+      lock_printing();
+      philosophers[me].state = EAT;
+      print_philosophers();
+      unlock_printing();
+
+      // Eat a bit
+      dawdle();
+
+      // Stop eating
+      lock_printing();
+      philosophers[me].state = CHANGING;
+      print_philosophers();
+      unlock_printing();
+
+      // Put down first fork
+      lock_printing();
+      philosophers[me].first = NO_FORK;
+      print_philosophers();
+      unlock_printing();
+      unlock(&forks[first]);
+
+      // Put down second fork
+      lock_printing();
+      philosophers[me].second = NO_FORK;
+      print_philosophers();
+      unlock_printing();
+      unlock(&forks[second]);
+
+      // Start thinking
+      lock_printing();
+      philosophers[me].state = THINK;
+      print_philosophers();
+      unlock_printing();
+
+      // Think a bit
+      dawdle();
+
+      // Stop thinking
+      lock_printing();
+      philosophers[me].state = CHANGING;
+      print_philosophers();
+      unlock_printing();
+
+      philosophers[me].isHungry --;
+   }
 
    return NULL;
 }

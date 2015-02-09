@@ -1,0 +1,6 @@
+Thomas Steinke (tsteinke@calpoly.edu)
+
+To run the program, run `make` or `make dine` in the terminal.
+
+Philosophers will default to eating once, but an optional command line
+argument changes how many times they want to eat.
