@@ -259,6 +259,11 @@
 (test-interp `((fn (seven) (seven))
                ((fn (minus) (fn () (minus (+ 3 10) (* 2 3))))
                 (fn (x y) (+ x (* -1 y))))) (num 7))
+(test-interp `((fn (a) 
+                  ((fn (b)
+                      ((fn (c) (a (b c))) 10))
+                   (fn (num) (a num))))
+               (fn (num) (* num num))) (num 10000))
 
 ;; Exception testing
 (test-interp/exn `(with (res = (if (<= (/ 9 3) (+ 1 1)) 10 11))

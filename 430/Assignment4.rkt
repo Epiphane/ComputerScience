@@ -29,8 +29,7 @@
 ;; Represents an expression
 (define-type ExprC
   [val (v : Value)]
-  [ifop (op : (number number -> boolean)) (l : ExprC) (r : ExprC)]
-  [binop (op : (number number -> number)) (l : ExprC) (r : ExprC)]
+  [binop (op : (Value Value -> Value)) (l : ExprC) (r : ExprC)]
   [ifC (cond : ExprC) (success : ExprC) (fail : ExprC)]
   [appC (fun : ExprC) (args : (listof ExprC))]
   [lam (args : (listof symbol)) (body : ExprC)])
@@ -40,6 +39,10 @@
 
 ;; the empty environment
 (define empty-env (hash (list)))
+
+;; Converts binary operation to value-returning
+(define (arith-op [fun : (number number -> number)]) : (Value Value -> Value)
+  (lambda (a b) (num (fun (num-n a) (num-n b)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Serialization
@@ -59,26 +62,51 @@
 (test (serialize (id 'abc)) "abc")
 (test (serialize (bool true)) "true")
 (test (serialize (bool false)) "false")
-(test (serialize (clos (list 'a) (binop + (val (num 5)) (val (num 2))) empty-env)) "#<procedure>")
+(test (serialize (clos (list 'a) (binop (arith-op +) (val (num 5)) (val (num 2))) empty-env)) "#<procedure>")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Parsing
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Represents any binary arithmetic operator
-(define (binary-op [type : s-expression]) : (optionof (number number -> number))
+(define (binary-op [type : s-expression]) : (optionof (Value Value -> Value))
   (cond 
-    [(equal? type `+) (some +)]
-    [(equal? type `-) (some -)]
-    [(equal? type `*) (some *)]
-    [(equal? type `/) (some /)]
+    [(equal? type `+) (some (arith-op +))]
+    [(equal? type `-) (some (arith-op -))]
+    [(equal? type `*) (some (arith-op *))]
+    [(equal? type `/) (some (arith-op /))]
+    [(equal? type `<=) (some (lambda (a b) (bool (<= (num-n a) (num-n b)))))]
+    [(equal? type `eq?)
+     (some (lambda (a b)
+             (type-case Value a
+               [clos (a b c) (bool #f)]
+               [else (type-case Value b
+                       [clos (a b c) (bool #f)]
+                       [else (bool (equal? a b))])])))]
     [else (none)]))
 
-(define (if-op [type : s-expression]) : (optionof (number number -> boolean))
-  (cond
-    [(equal? type `<=) (some <=)]
-    [(equal? type `eq?) (some equal?)]
-    [else (none)]))
+;; Equality tests
+(define (get-op [op : s-expression]) : (Value Value -> Value)
+  (type-case (optionof (Value Value -> Value)) (binary-op op)
+    [some (s) s]
+    [else (error 'e "Error!")]))
+;; This is annoying
+(test/exn (get-op `abc) "Error!")
+(define eq-test (get-op `eq?))
+(test (eq-test (num 3) (num 3)) (bool #t))
+(test (eq-test (num 3) (num 1)) (bool #f))
+(test (eq-test (num 1) (bool true)) (bool #f))
+(test (eq-test (bool true) (bool false)) (bool #f))
+(test (eq-test (bool true) (bool true)) (bool #t))
+(test (eq-test
+       (clos (list) (val (num 3)) empty-env)
+       (clos (list) (val (num 3)) empty-env))
+      (bool #f))
+(test (eq-test
+       (num 10)
+       (clos (list) (val (num 3)) empty-env))
+      (bool #f))
+;; Finish equality tests
 
 ;; Reserved words
 (define reserved (list `fn `true `false `if `with `+ `- `* `/ `<= `eq? `=))
@@ -119,23 +147,18 @@
      (lam (fn-args (s-exp->list (second (s-exp->list expr))))
                 (parse (third (s-exp->list expr))))]
     [(s-exp-match? `(SYMBOL ANY ANY) expr)
-     (type-case (optionof (number number -> number))
+     (type-case (optionof (Value Value -> Value))
        (binary-op (first (s-exp->list expr)))
        [some (fun) (binop fun
                           (parse (second (s-exp->list expr)))
                           (parse (third (s-exp->list expr))))]
        [none () 
-             (type-case (optionof (number number -> boolean))
-               (if-op (first (s-exp->list expr)))
-               [some (fun) (ifop fun
-                                 (parse (second (s-exp->list expr)))
-                                 (parse (third (s-exp->list expr))))]
-               [none () (cond [(member (first (s-exp->list expr)) reserved)
-                               (error 'parse "Syntax does not match EBNF spec")]
-                              [else (appC (val (id (s-exp->symbol 
-                                               (first (s-exp->list expr)))))
-                                          (map (lambda (arg) (parse arg))
-                                               (rest (s-exp->list expr))))])])])]
+             (cond [(member (first (s-exp->list expr)) reserved)
+                    (error 'parse "Syntax does not match EBNF spec")]
+                   [else (appC (val (id (s-exp->symbol 
+                                         (first (s-exp->list expr)))))
+                               (map (lambda (arg) (parse arg))
+                                    (rest (s-exp->list expr))))])])]
     [(s-exp-match? `(ANY ...) expr)
      (cond
        [(member (first (s-exp->list expr)) reserved)
@@ -156,16 +179,6 @@
                                  (list (val (num 10)))))
 (test (parse `134) (val (num 134)))
 (test (parse `abc) (val (id 'abc)))
-(test (parse `(if {<= a b} 19 21)) 
-      (ifC (ifop <=
-                  (val (id 'a))
-                  (val (id 'b)))
-           (val (num 19))
-           (val (num 21))))
-(test (parse `(with (a = (+ 4 6)) (b = 12) (* a b)))
-      (appC (lam (list 'a 'b)
-                 (binop * (val (id 'a)) (val (id 'b))))
-            (list (binop + (val (num 4)) (val (num 6))) (val (num 12)))))
 (test (parse `(fn {} 6)) (lam (list) (val (num 6))))
 
 ;; Exception testing
@@ -217,10 +230,8 @@
         [binop (op l r)
                (cond
                  [(equal? (recur r) (num 0)) (error 'binop "Division by zero")]
-                 [else (num (op (num-n (recur l)) 
-                                (num-n (recur r))))])]
-        [ifop (op l r) (bool (op (num-n (recur l))
-                                 (num-n (recur r))))]
+                 [else (op (recur l) 
+                           (recur r))])]
         [ifC (test success fail) (cond
                                    [(not (bool? (recur test)))
                                     (error 'if "Non-boolean test in if statement")]
@@ -259,6 +270,11 @@
 (test-interp `((fn (seven) (seven))
                ((fn (minus) (fn () (minus (+ 3 10) (* 2 3))))
                 (fn (x y) (+ x (* -1 y))))) (num 7))
+(test-interp `((fn (a) 
+                  ((fn (b)
+                      ((fn (c) (a (b c))) 10))
+                   (fn (num) (a num))))
+               (fn (num) (* num num))) (num 10000))
 
 ;; Exception testing
 (test-interp/exn `(with (res = (if (<= (/ 9 3) (+ 1 1)) 10 11))
