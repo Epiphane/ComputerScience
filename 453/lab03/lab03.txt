@@ -1,0 +1,125 @@
+Lab 3 - Setting up Minix
+Thomas Steinke
+
+-----------------------------------------------------------------------------------
+
+System details
+
+Minix 3.1.8 (Provided disk image)
+Host machine: Mac OS X 10.10.1
+Running Minix using Qemu
+
+-----------------------------------------------------------------------------------
+
+1. Get a minix System
+
+Approach:
+The procedure involved installing the qemu emulator on my machine, getting a Minix disk to boot, and loading the simulator through qemu.
+
+Problems Encountered:
+a. The downloadable binary to configure and run qemu did not work on my machine, so I couldn't get an executable to work.
+b. Additionally, once I ran the program to boot Minix, my computer appeared to be stuck in an infinite loop (waited approx 20 minutes for terminal to appear).
+
+Solutions:
+a. The solution to the binary not working correctly was to use `brew install qemu` instead of downloading a binary from the net. (Another problem) I also had to run `brew update` to make sure that all dependencies would be taken care of.
+b. When I run qemu with the Minix image, the emulator is initially created behind all of my other windows, so I had to minimize them to see it.
+
+Lessons Learned:
+Homebrew is a powerful tool (on Mac) for getting packages, and it's best to start there for getting things I need if I can find them there.
+Also, make sure to check what other processes are actually running before leaving the computer idle for 20 minutes.
+
+-----------------------------------------------------------------------------------
+
+2. Logging in
+
+Approach:
+The procedure for logging in was to enter the root username and password at prompt.
+
+Problems Encountered:
+No problems came up during my login session
+
+Solutions:
+N/A
+
+Lessons learned:
+None
+
+-----------------------------------------------------------------------------------
+
+3. Create a user account
+
+Approach:
+The procedure for this section was to use the adduser and passwd actions to create a user account for myself, so that I wouldn't be working with superuser privileges.
+
+Problems Encountered:
+a. When specifying the home directory, I put simply `tsteinke`, which created a home directory for my account in /root/tsteinke. Then, when I logged in as tsteinke, the system could not find my home directory.
+b. In trying to fix this, I searched Minix documentation for a way to delete and recreate my user account but could not find anything useful (most commands were for a different version of Minix).
+c. Once I created /home/tsteinke for my account, I still received write permissions errors on the directory when logged in.
+
+Solutions:
+a. I solved this problem by creating the directory /home/tsteinke, which could then be recognized by the system.
+c. I looked through some more documentation and discovered the `chown` command, which allowed me to transfer ownership of /home/tsteinke from root to my user account.
+b. Since I fixed my user account, a command to delete it became unnecessary. However, I did track down /etc/shadow, and deleted my user from that table. That turned out to be an awful idea: it destroyed my ability to log in AND my user was still registered in the system. In addition, I accidentally deleted root and had to re-download the image.
+
+Lessons Learned:
+If a user's home directory is not created by adduser, then you will get errors trying to modify the home directory (since adduser transfers ownership automatically and mkdir does not, naturally).
+It's important to find documentation for the correct version of Minix, since commands can be different on different versions.
+/etc/shadow keeps track of a user's actual, encrypted password.
+/etc/passwd keeps track of the rest of a user's information. If you want to delete a user, you just need to delete their line here (and preferably in /etc/shadow, though it doesn't appear to be necessary).
+If you delete root, you can type `su` and Minix will greet you with the philosophical error "You do not exist", which is cool.
+Being able to render an operating system as useless as a rock is pretty fun. Not smart, but fun.
+
+-----------------------------------------------------------------------------------
+
+4. Create a Minix disk image
+
+Approach:
+This procedure included creating an empty dist image file, mount it in Minix, and play with the data in both Minix and the host machine.
+I also added a file, hello.txt, to confirm that I was working with the right data in part 5.
+
+Problems Encountered:
+a. I accidentally created my first disk image file in Minix instead of on my host machine, so I could not format it or mount it as a disk.
+b. Once I correctly created the disk image and loaded it into Minix, I mounted it to /home/tsteinke/mnt/testfloppy instead of /mnt/testfloppy. It didn't cause any problems, but the discovery of the /mnt folder made it clear where globally-mounted file systems would be better suited.
+c. When I ran `mkfs`, I got a `command not found` error.
+
+Solutions:
+a. Once I figured out I was meant to create the empty disk image on my host machine, I created it there and it worked fine.
+b. I umounted the floppy and remounted it at /mnt/testfloppy, and things worked fine.
+c. I found `mkfs` in /sbin, and added that directory to the path. Then mkfs worked correctly.
+
+Lessons Learned:
+To be accessed globally, file systems should be mounted in /mnt, not a local (home path) directory.
+If a man page finds a command but the command doesn't run, then your path is missing something important.
+
+-----------------------------------------------------------------------------------
+
+5. Accessing your data from outside Minix
+
+Approach:
+To access the data outside of minix, I transported my Minix file system to the Unix machines and opened it to see the contents.
+
+Problems Encountered:
+My host machine could not read/mount the Minix file system.
+I ran into a permissions problem mounting the file system on the school unix machines.
+
+Solutions:
+I sent my Minix file system to the Unix machines and used your demo commands `minls testfloppy` and `minget testfloppy hello.txt` to output the file.
+
+Lessons Learned:
+Mac is not super helpful when it comes to loading and reading Minix file systems.
+
+-----------------------------------------------------------------------------------
+
+5. Clean up and shut down
+
+Approach:
+This procedure simply involved safely shutting down the system (including umounting the floppy drive from part 4)
+
+Problems Encountered:
+None
+
+Solutions:
+N/A
+
+Lessons Learned:
+None
