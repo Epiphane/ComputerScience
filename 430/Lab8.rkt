@@ -606,4 +606,4 @@
                                               {if {eq? {{l "length"}} 2} true fail3}}})))
 
 ;; Doublemap for cons and empty
-#;(define bozor-doublemap )
+(define bozor-doublemap `{fn {list}})
