@@ -69,6 +69,8 @@ It's important to find documentation for the correct version of Minix, since com
 If you delete root, you can type `su` and Minix will greet you with the philosophical error "You do not exist", which is cool.
 Being able to render an operating system as useless as a rock is pretty fun. Not smart, but fun.
 
+P.S. 
+
 -----------------------------------------------------------------------------------
 
 4. Create a Minix disk image

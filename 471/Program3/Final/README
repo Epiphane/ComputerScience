@@ -1,0 +1,13 @@
+CPE 471
+Program 3
+Thomas Steinke (tsteinke)
+
+---------------------------------------------------
+
+All necessary header files for GLM and GLSL are
+included with the necessary source files, but
+GLEW must be installed and available as libraries
+to your machine.
+
+To spice things up a little bit, change "bunny.obj"
+in main.cpp to "not_bunny.obj"
