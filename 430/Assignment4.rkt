@@ -356,7 +356,7 @@
     [new-arrayC (l v) (type-case V*S (interp l env sto)
                         [v*s (len sto1) (type-case V*S (interp v env sto1)
                                           [v*s (val sto2) 
-                                               (let ([res (allocate sto (get-num len) val)])
+                                               (let ([res (allocate sto2 (get-num len) val)])
                                                  (v*s (array (fst res) (get-num len)) (snd res)))])])]
     [refC (a n) (type-case V*S (interp a env sto)
                   [v*s (arr sto1) 
@@ -511,7 +511,7 @@
                                     (my-array[b] <- (if (<= a b) (+ a b) (- a b)))
                                     (ref my-array[b])))))
                 "42")
-#;(test (top-eval 
+(test (top-eval 
        '{with {a = 0}
               {with {a! = {fn {expected}
                                {if {eq? a expected}
@@ -531,74 +531,5 @@
                            {{begin {a! 10} {fn {x y} {begin {a! 13} {+ x y}}}}
                             {begin {a! 11} 3}
                             {begin {a! 12} 4}}
-                           14}}})
-      "14")
-#;(test (top-eval 
-       '{with {a = 0}
-              {with {a! = {fn {expected}
-                               {if {eq? a expected}
-                                   {a <- {+ 1 a}}
-                                   {/ expected 0}}}}
-                    {begin {+ {a! 0} {a! 1}}
-                           {if {begin {a! 2} true}
-                               {a! 3}
-                               {/ 1 0}}
-                           {new-array {begin {a! 4} 34}
-                                  {begin {a! 5} false}}
-                           {{begin {a! 6} {new-array 3 false}}
-                            [{begin {a! 7} 2}]
-                            <- {begin {a! 8} 98723}}
-                           {with {p = 9}
-                                 {p <- {a! 9}}}
-                           {{begin {a! 10} {fn {x y} {begin {a! 13} {+ x y}}}}
-                            {begin {a! 11} 3}
-                            {begin {a! 12} 4}}
-                           14}}})
-      "14")
-
-(test (top-eval 
-       '{with {a = 0}
-              {with {a! = {fn {expected}
-                               {if {eq? a expected}
-                                   {a <- {+ 1 a}}
-                                   {/ a 0}}}}
-                    {begin {new-array {begin {a! 0} 34}
-                                  {begin {a! 1} false}}
-                           {{begin {a! 2} {new-array 3 false}}
-                            [{begin {a! 3} 2}]
-                            <- {begin {a! 4} 98723}}
-                           14}}}) "2")
-(test (top-eval 
-       '{with {a = 0}
-              {with {a! = {fn {expected}
-                               {if {eq? a expected}
-                                   {a <- {+ 1 a}}
-                                   {/ expected 0}}}}
-                    {begin {new-array {begin {a! 0} 34}
-                                  {begin {a! 1} false}}
-                           {{begin {a! 2} {new-array 3 false}}
-                            [{begin {a! 3} 2}]
-                            <- {begin {a! 4} 98723}}
-                           14}}})
-      "14")
-(test (top-eval 
-       '{with {a = 0}
-              {with {a! = {fn {expected}
-                               {if {eq? a expected}
-                                   {a <- {+ 1 a}}
-                                   {/ expected 0}}}}
-                    {begin {new-array {begin {a! 0} 34}
-                                  {begin {a! 1} false}}
-                           14}}})
-      "14")
-(test (top-eval 
-       '{with {a = 0}
-              {with {a! = {fn {expected}
-                               {if {eq? a expected}
-                                   {a <- {+ 1 a}}
-                                   {/ expected 0}}}}
-                    {begin {{begin {a! 0} {new-array 3 false}}
-                            [{begin {a! 1} 2}]
-                            <- {begin {a! 2} 98723}}
                            14}}})
       "14")

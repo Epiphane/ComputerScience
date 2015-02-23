@@ -37,9 +37,9 @@
 ;; Represents an expression
 (define-type ExprC
   [numC (n : number)]
+  [strC (s : string)]
   [idC (i : symbol)]
   [boolC (b : boolean)]
-  [strC (s : string)]
   [new-arrayC (len : ExprC) (val : ExprC)]
   [arr-setC (arr : ExprC) (ndx : ExprC) (val : ExprC)]
   [refC (arr : ExprC) (ndx : ExprC)]
@@ -108,10 +108,10 @@
     [array (s l) "#<array>"]))
 
 ;; Test cases
+(test (serialize (str "Hello")) "Hello")
 (test (serialize (num 32)) "32")
 (test (serialize (bool true)) "true")
 (test (serialize (bool false)) "false")
-(test (serialize (str "hello")) "hello")
 (test (serialize (clos (list 'a) (numC 2) empty-env)) "#<procedure>")
 (test (serialize (array 3 4)) "#<array>")
 
@@ -142,11 +142,15 @@
     [(equal? type `+) (some (arith-op +))]
     [(equal? type `-) (some (arith-op -))]
     [(equal? type `*) (some (arith-op *))]
-    [(equal? type `expt) (some (arith-op expt))]
     [(equal? type `/) (some (arith-op (lambda (a b)
                                         (if (equal? b 0)
-                                            (error 'eval "Division by zero")
+                                            (error 'eval 
+                                                   (string-append (string-append 
+                                                                   "Division of "
+                                                                   (to-string a))
+                                                                  " by zero"))
                                             (/ a b)))))]
+    [(equal? type `expt) (some (arith-op expt))]
     [(equal? type `eq?) (some (lambda (a b) (bool (equal? a b))))]
     [(equal? type `<=) (some (if-op <=))]
     [else (none)]))
@@ -156,7 +160,6 @@
   (some-v (binary-op op)))
 
 ;; Test cases
-(test ((get-arith-op `expt) (num 1) (num 3)) (num 1))
 (test ((get-arith-op `+) (num 5) (num 6)) (num 11))
 (test/exn ((get-arith-op `-) (bool true) (num 6)) "Not a number: true")
 (test/exn ((get-arith-op `/) (num 6) (bool false)) "Not a number: false")
@@ -188,9 +191,9 @@
 (define (parse [expr : s-expression]) : ExprC
   (cond
     [(s-exp-match? `NUMBER expr) (numC (s-exp->number expr))]
-    [(s-exp-match? `true expr) (boolC true)]
-    [(s-exp-match? `false expr) (boolC false)]
     [(s-exp-match? `STRING expr) (strC (s-exp->string expr))]
+    [(s-exp-match? `true expr) (boolC true)]
+    [(s-exp-match? `false expr) (boolC  false)]
     [(s-exp-match? `SYMBOL expr) 
      (if (member expr reserved)
          (error 'parse "Reserved word cannot be used as identifier")
@@ -231,14 +234,17 @@
                           (parse (third (s-exp->list expr))))]
        [none () 
              (cond [(member (first (s-exp->list expr)) reserved)
-                    (error 'parse "Syntax does not match EBNF spec")]
+                    (error 'parse (string-append "Reserved string: " (symbol->string 
+                                                                      (s-exp->symbol (first (s-exp->list expr))))))]
                    [else (appC (idC (s-exp->symbol 
                                          (first (s-exp->list expr))))
                                (map (lambda (arg) (parse arg))
                                     (rest (s-exp->list expr))))])])]
     [(s-exp-match? `(SYMBOL ANY ...) expr)
      (if (member (first (s-exp->list expr)) reserved)
-         (error 'parse "Reserved word cannot be used as identifier")
+         (error 'parse (string-append "Reserved word cannot be used as identifier: " 
+                                      (symbol->string 
+                                       (s-exp->symbol (first (s-exp->list expr))))))
          (appC (idC (s-exp->symbol (first (s-exp->list expr))))
                (map (lambda (arg) (parse arg))
                     (rest (s-exp->list expr)))))]
@@ -251,7 +257,6 @@
 ;; Test cases
 (test (parse `true) (boolC true))
 (test (parse `false) (boolC false))
-(test (parse `"Hi") (strC "Hi"))
 (test (parse `134) (numC 134))
 (test (parse `abc) (idC 'abc))
 (test (serialize (clos (list) (parse `(+ 4 5)) empty-env)) "#<procedure>")
@@ -278,7 +283,7 @@
 (test (parse `(fn {} 6)) (lam (list) (numC 6)))
 
 ;; Exception testing
-(test/exn (parse `(if 4 5)) "Syntax does not match EBNF spec")
+(test/exn (parse `(if 4 5)) "Reserved string: if")
 (test/exn (parse `(fn {a -} {- a -})) "Reserved word cannot be used as identifier")
 (test/exn (parse `(fn {a a} {- a a})) "Argument identifiers are not unique")
 (test/exn (parse `(13 - 10)) "Reserved word cannot be used as identifier")
@@ -341,8 +346,8 @@
 (define (interp [e : ExprC] [env : Environment] [sto : Sto]) : V*S
   (type-case ExprC e
     [numC (n) (v*s (num n) sto)]
-    [strC (s) (v*s (str s) sto)]
     [boolC (b) (v*s (bool b) sto)]
+    [strC (s) (v*s (str s) sto)]
     [idC (i) (v*s (find-symbol i env sto) sto)]
     [binop (op a b) (type-case V*S (interp a env sto)
                       [v*s (l sto1) (type-case V*S (interp b env sto1)
@@ -356,7 +361,7 @@
     [new-arrayC (l v) (type-case V*S (interp l env sto)
                         [v*s (len sto1) (type-case V*S (interp v env sto1)
                                           [v*s (val sto2) 
-                                               (let ([res (allocate sto (get-num len) val)])
+                                               (let ([res (allocate sto2 (get-num len) val)])
                                                  (v*s (array (fst res) (get-num len)) (snd res)))])])]
     [refC (a n) (type-case V*S (interp a env sto)
                   [v*s (arr sto1) 
@@ -469,7 +474,7 @@
 (test/exn (test-interp `(new-array true 10)) "Not a number: true")
 (test/exn (test-interp `(/ true 0)) "Not a number: true")
 (test/exn (test-interp `(if 10 1 0)) "Not a boolean: 10")
-(test/exn (test-interp `(/ 12 0)) "Division by zero")
+(test/exn (test-interp `(/ 12 0)) "Division of 12 by zero")
 (test/exn (test-interp `ab) "Unbound Identifier")
 (test/exn (test-interp `(ab 12)) "Unbound Identifier")
 (test/exn (test-interp `(+ / 2)) "Reserved word cannot be used as identifier")
@@ -479,7 +484,6 @@
 (test/exn (test-interp `((fn () 6) 1 2 3)) "Incorrect number of arguments")
 (test/exn (test-interp `(begin)) "No expressions to execute")
 
-(test (top-eval `"Hello") "Hello")
 (test (top-eval `(eq? (new-array 2 2) (new-array 2 3))) "false")
 (test (top-eval `(with 
                   (make-incr = (fn (x) (fn () (begin (x <- (+ x 1)) x)))) 
@@ -512,6 +516,28 @@
                                     (my-array[b] <- (if (<= a b) (+ a b) (- a b)))
                                     (ref my-array[b])))))
                 "42")
+(test (top-eval 
+       '{with {a = 0}
+              {with {a! = {fn {expected}
+                               {if {eq? a expected}
+                                   {a <- {+ 1 a}}
+                                   {/ a 0}}}}
+                    {begin {+ {a! 0} {a! 1}}
+                           {if {begin {a! 2} true}
+                               {a! 3}
+                               {/ 1 0}}
+                           {new-array {begin {a! 4} 34}
+                                  {begin {a! 5} false}}
+                           {{begin {a! 6} {new-array 3 false}}
+                            [{begin {a! 7} 2}]
+                            <- {begin {a! 8} 98723}}
+                           {with {p = 9}
+                                 {p <- {a! 9}}}
+                           {{begin {a! 10} {fn {x y} {begin {a! 13} {+ x y}}}}
+                            {begin {a! 11} 3}
+                            {begin {a! 12} 4}}
+                           14}}})
+      "14")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -565,7 +591,19 @@
 (define bozor-cons `{Cons = {fn {first rest}
                                 {fn {methodname}
                                     {if {eq? methodname "first"} {fn {} first}
-                                        {if {eq? methodname "rest"} {fn {} rest}}}}}})
-(define bozor-empty `{Empty = {fn {} }})
+                                        {if {eq? methodname "rest"} {fn {} rest} 
+                                            {if {eq? methodname "length"} 
+                                                {fn {} {+ 1 {{rest "length"}}}}
+                                                {/ 1 0}}}}}}})
+(define bozor-empty `{Empty = {fn {methodname} 
+                                  {if {eq? methodname "length"} {fn {} 0} {/ 1 0}}}})
 (test-interp (list->s-exp (list `with
-                                bozor-cons)))
+                                bozor-cons
+                                bozor-empty
+                                `{with {l = {Cons 10 {Cons 12 Empty}}}
+                                       {begin {if {eq? {{l "first"}} 10} true fail1}
+                                              {if {eq? {{{{l "rest"}} "first"}} 12} true fail2}
+                                              {if {eq? {{l "length"}} 2} true fail3}}})))
+
+;; Doublemap for cons and empty
+#;(define bozor-doublemap )
