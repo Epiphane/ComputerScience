@@ -206,6 +206,9 @@
                               (first args)
                               (interp (first evals) env)))]))
 
+(define (getnum n)
+  (if (num? n) (num-n n) (error 'type "Not a number")))
+
 ;; Main interpretation function
 (define (interp [expr : ExprC] [env : Environment]) : Value
   (local [(define (find n) (find-symbol n env))]
@@ -217,10 +220,10 @@
         [binop (op l r)
                (cond
                  [(equal? (recur r) (num 0)) (error 'binop "Division by zero")]
-                 [else (num (op (num-n (recur l)) 
-                                (num-n (recur r))))])]
-        [ifop (op l r) (bool (op (num-n (recur l))
-                                 (num-n (recur r))))]
+                 [else (num (op (getnum (recur l)) 
+                                (getnum (recur r))))])]
+        [ifop (op l r) (bool (op (getnum (recur l))
+                                 (getnum (recur r))))]
         [ifC (test success fail) (cond
                                    [(not (bool? (recur test)))
                                     (error 'if "Non-boolean test in if statement")]
