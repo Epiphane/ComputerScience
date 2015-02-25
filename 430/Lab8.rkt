@@ -168,6 +168,7 @@
 (test ((get-arith-op `eq?) (num 5) (bool false)) (bool false))
 (test/exn ((get-arith-op `<=) (bool true) (num 6)) "Not a number: true")
 (test/exn ((get-arith-op `<=) (num 6) (bool true)) "Not a number: true")
+(test ((get-arith-op `eq?) (str "Hi") (str "Hi")) (bool true))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Parsing
@@ -557,6 +558,7 @@
                                                   {if {eq? methodname "get-y"} {fn {} y}
                                                       {/ 1 0}}}}}}})
 
+;; Test Cases
 (test-interp (list->s-exp (list `with
                                 bozor-point
                                 `{with {p1 = {Point 10 3}}
@@ -577,6 +579,7 @@
                                                        {{b "distance"} c}}}
                                                 {/ 1 0}}}}})
 
+;; Test Cases
 (test-interp (list->s-exp (list `with
                                 bozor-point
                                 bozor-triangle
@@ -596,7 +599,9 @@
                                                 {fn {} {+ 1 {{rest "length"}}}}
                                                 {/ 1 0}}}}}}})
 (define bozor-empty `{Empty = {fn {methodname} 
-                                  {if {eq? methodname "length"} {fn {} 0} {/ 1 0}}}})
+                                  {if {eq? methodname "length"} {fn {} 0} {/ 3 0}}}})
+
+;; Test Cases
 (test-interp (list->s-exp (list `with
                                 bozor-cons
                                 bozor-empty
@@ -606,4 +611,72 @@
                                               {if {eq? {{l "length"}} 2} true fail3}}})))
 
 ;; Doublemap for cons and empty
-#;(define bozor-doublemap )
+(define bozor-doublemap-proto `{doublemap = {fn {list} {/ 2 0}}})
+(define bozor-doublemap `{doublemap <- {fn {list} 
+                                           {if {eq? {{list "length"}} 0} Empty
+                                               {Cons {* 2 {{list "first"}}} 
+                                                     {doublemap {{list "rest"}}}}}}})
+
+;; Test Cases
+(test-interp (list->s-exp 
+              (list `with
+                    bozor-cons
+                    bozor-empty
+                    bozor-doublemap-proto
+                    (list->s-exp 
+                     (list `begin
+                           bozor-doublemap
+                           `{with [list = {Cons 3 {Cons 0 Empty}}]
+                                  {begin
+                                    {if {eq? {{(doublemap list) "first"}} 6} true fail1}
+                                    {if {eq? {{{{(doublemap list) "rest"}} "first"}} 0} true fail2}}})))))
+
+;; Interp! (We need to go deeper)
+(define bozor-interp-proto `{bozor-interp = {fn {list} {/ 2 0}}})
+(define bozor-interp 
+  `{bozor-interp <- {fn {expr}
+                        {if {eq? {{expr "length"}} 1} {{expr "first"}}
+                            {if {eq? {{expr "first"}} "+"} 
+                                {+ {bozor-interp {{{{expr "rest"}} "first"}}}
+                                   {bozor-interp {{{{{{expr "rest"}} "rest"}} "first"}}}}
+                                {if {eq? {{expr "first"}} "-"}
+                                    {- {bozor-interp {{{{expr "rest"}} "first"}}}
+                                       {bozor-interp {{{{{{expr "rest"}} "rest"}} "first"}}}}
+                                    {if {eq? {{expr "first"}} "*"}
+                                        {* {bozor-interp {{{{expr "rest"}} "first"}}}
+                                           {bozor-interp {{{{{{expr "rest"}} "rest"}} "first"}}}}
+                                        {if {eq? {{expr "first"}} "/"}
+                                            {/ {bozor-interp {{{{expr "rest"}} "first"}}}
+                                               {bozor-interp {{{{{{expr "rest"}} "rest"}} "first"}}}}
+                                            not-recognized}}}}}}})
+
+;; Test cases
+(test-interp (list->s-exp 
+              (list `with
+                    bozor-cons
+                    bozor-empty
+                    bozor-doublemap-proto
+                    bozor-interp-proto
+                    (list->s-exp 
+                     (list `begin
+                           bozor-doublemap
+                           bozor-interp
+                           ;; {+ 4 2}
+                           `{if {eq? 
+                                {bozor-interp {Cons "+" 
+                                                    {Cons {Cons 4 Empty} 
+                                                          {Cons {Cons 2 Empty} Empty}}}}
+                                6} true fail1}
+                           ;; {- {* 6 3} 13}
+                           `{if {eq? 
+                                {bozor-interp {Cons "-" 
+                                                    {Cons {Cons "*" 
+                                                                {Cons {Cons 6 Empty} 
+                                                                      {Cons {Cons 3 Empty} Empty}}}
+                                                          {Cons {Cons 13 Empty} Empty}}}}
+                                5} true fail2}
+                           ;; {/ 8 1}
+                           `{if {eq? 
+                                {bozor-interp {Cons "/" {Cons {Cons 8 Empty} 
+                                                              {Cons {Cons 1 Empty} Empty}}}}
+                                8} true fail3})))))
