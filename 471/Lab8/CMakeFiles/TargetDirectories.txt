@@ -1,0 +1,4 @@
+/Users/thomassteinke/Code/ComputerScience/471/Lab8/CMakeFiles/ALL_BUILD.dir
+/Users/thomassteinke/Code/ComputerScience/471/Lab8/CMakeFiles/Lab6.dir
+/Users/thomassteinke/Code/ComputerScience/471/Lab8/CMakeFiles/ZERO_CHECK.dir
+/Users/thomassteinke/Code/ComputerScience/471/Lab8/dependencies/glfw/src/CMakeFiles/glfw.dir
