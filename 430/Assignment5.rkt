@@ -193,11 +193,6 @@
     [else (append (list (s-exp->symbol (first exprs))) 
                   (fn-args (rest exprs)))]))
 
-;; Parse a function definition
-(define (parse-fn [classes : ClassMap] [parts : (listof s-expression)]) : ExprC
-  (lam (fn-args (s-exp->list (first parts)))
-       (parse classes (second parts))))
-
 (define-type Class
   [class (fields : (listof symbol)) (constructor : ExprC)])
 (define-type-alias ClassMap (hashof symbol Class))
@@ -208,16 +203,17 @@
    (list (values 'Object
                  (class empty
                    (lam empty (lam (list 'methodname) (idC 'method-doesnt-exist))))))))
-;;           (class empty (list `(fn {methodname} {method-doesnt-exist})))))))
 
 ;; Parse class methods
 ;; Method structure: {method id {id ...} GUCI5}
-(define (class-methods [classes : ClassMap] [methods : (listof s-expression)]) : ExprC
+(define (class-methods [methods : (listof s-expression)]) : ExprC
   (cond
-    [(empty? methods) (appC (idC 'parent) (list (idC 'methodname)))]
+    [(empty? methods) (appC (idC 'parent) (list (idC 'methodname) (idC 'this)))]
     [else (ifC (binop (get-arith-op `eq?) (idC 'methodname) (strC (symbol->string (s-exp->symbol (second (s-exp->list (first methods)))))))
-               (parse-fn classes (rest (rest (s-exp->list (first methods)))))
-               (class-methods classes (rest methods)))]))
+               (lam 
+                (map s-exp->symbol (s-exp->list (third (s-exp->list (first methods)))))
+                (parse (fourth (s-exp->list (first methods)))))
+               (class-methods (rest methods)))]))
 
 ;; Combines a list of fields
 (define (list-combine [l1 : (listof symbol)] [l2 : (listof symbol)]) : (listof symbol)
@@ -241,9 +237,9 @@
                                   (lam combined-fields
                                        (appC (lam (list 'parent)
                                                   (lam 
-                                                   (list 'methodname)
-                                                   (class-methods classes (rest (rest (rest (rest (rest pieces))))))))
-                                             (list (appC parent-constructor
+                                                   (list 'methodname 'this)
+                                                   (class-methods (rest (rest (rest (rest (rest pieces))))))))
+                                             (list (appC (idC (s-exp->symbol (fourth pieces)))
                                                          (map (lambda (sym) (idC sym)) parent-fields))))))))])]
           [none () (error 'class-ref (string-append (symbol->string (s-exp->symbol (fourth pieces)))
                                                     " not declared"))]))
@@ -251,7 +247,7 @@
 
 ;; Parse an s-expression
 (define (parse [expr : s-expression])
-  (local [(define (recur e) (parse classes e))]
+  (local [(define (recur e) (parse e))]
     (cond
       [(s-exp-match? `NUMBER expr) (numC (s-exp->number expr))]
       [(s-exp-match? `STRING expr) (strC (s-exp->string expr))]
@@ -261,19 +257,24 @@
        (if (member expr reserved)
            (error 'parse "Reserved word cannot be used as identifier")
            (idC (s-exp->symbol expr)))]
-      [(s-exp-match? `(array ANY ANY) expr)
+      ; new array
+      [(s-exp-match? `(new-array ANY ANY) expr)
        (arrayC (recur (second (s-exp->list expr)))
                    (recur (third (s-exp->list expr))))]
+      ; ref
       [(s-exp-match? `(ref ANY[ANY]) expr)
        (refC (recur (second (s-exp->list expr)))
              (recur (first (s-exp->list (third (s-exp->list expr))))))]
+      ; array set
       [(s-exp-match? `(ANY[ANY] <- ANY) expr)
        (arr-setC (recur (first (s-exp->list expr)))
                  (recur (first (s-exp->list (second (s-exp->list expr)))))
                  (recur (fourth (s-exp->list expr))))]
+      ; set
       [(s-exp-match? `(SYMBOL <- ANY) expr)
        (setC (s-exp->symbol (first (s-exp->list expr)))
              (recur (third (s-exp->list expr))))]
+      ; with
       [(s-exp-match? `(with {SYMBOL = ANY} ... ANY) expr)
        (appC
         (lam (fn-args (map (lambda (arg) (first (s-exp->list arg)))
@@ -281,32 +282,41 @@
              (recur (first (reverse (s-exp->list expr)))))
         (map (lambda (arg) (recur (third (s-exp->list arg))))
              (reverse (rest (reverse (rest (s-exp->list expr)))))))]
+      ; rec
       [(s-exp-match? `(rec {SYMBOL = ANY} ANY) expr)
        (let [(fn-name (s-exp->symbol (first (s-exp->list (second (s-exp->list expr))))))]
-         (appC
-          (lam (list (s-exp->symbol (first (s-exp->list (second (s-exp->list expr))))))
-               (recur (third (s-exp->list expr))))
-          (list (appC (lam (list fn-name)
-                           (setC fn-name (recur (third (s-exp->list (second (s-exp->list expr)))))))
-                      (list (numC 0))))))]
+         (if (member (symbol->s-exp fn-name) reserved)
+             (error 'argument "Reserved word cannot be used as identifier")
+             (appC
+              (lam (list (s-exp->symbol (first (s-exp->list (second (s-exp->list expr))))))
+                   (recur (third (s-exp->list expr))))
+              (list (appC (lam (list fn-name)
+                               (setC fn-name (recur (third (s-exp->list (second (s-exp->list expr)))))))
+                          (list (numC 0)))))))]
+      ; if
       [(s-exp-match? `(if ANY ANY ANY) expr)
        (ifC (recur (second (s-exp->list expr)))
             (recur (third (s-exp->list expr)))
             (recur (fourth (s-exp->list expr))))]
+      ; fn
       [(s-exp-match? `(fn {SYMBOL ...} ANY) expr)
-       (parse-fn classes (rest (s-exp->list expr)))]
+       (lam (fn-args (s-exp->list (second (s-exp->list expr))))
+            (parse (third (s-exp->list expr))))]
+      ; begin
       [(s-exp-match? `(begin ANY ...) expr)
        (beginC (map (lambda (exp) (recur exp)) (rest (s-exp->list expr))))]
-      [(s-exp-match? `(send ANY STRING ANY ...) expr)
-       (appC (appC (recur (second (s-exp->list expr))) (list (strC (s-exp->string (third (s-exp->list expr))))))
+      ; send
+      [(s-exp-match? `(send ANY SYMBOL ANY ...) expr)
+       (appC (appC (recur (second (s-exp->list expr))) 
+                   (list (strC (symbol->string (s-exp->symbol (third (s-exp->list expr)))))
+                         (recur (second (s-exp->list expr)))))
              (map recur (rest (rest (rest (s-exp->list expr))))))]
+      ; new
       [(s-exp-match? `(new SYMBOL ANY ...) expr)
-       (type-case (optionof Class) (hash-ref classes (s-exp->symbol (second (s-exp->list expr))))
-         [some (c) 
-               (type-case Class c
-                 [class (fields constructor) 
-                   (appC constructor (map recur (rest (rest (s-exp->list expr)))))])]
-         [none () (error 'not-found "Class not found")])]
+       (appC (idC (s-exp->symbol 
+                   (second (s-exp->list expr))))
+             (map recur (rest (rest (s-exp->list expr)))))]
+      ; other function
       [(s-exp-match? `(SYMBOL ANY ANY) expr)
        (type-case (optionof (Value Value -> Value)) (binary-op (first (s-exp->list expr)))
          [some (fun) (binop fun
@@ -330,12 +340,35 @@
              (map (lambda (arg) (recur arg))
                   (rest (s-exp->list expr))))])))
 
+;; Inject class definitions into expr
+(define (inject-and-parse [classnames : (listof symbol)] [classes : ClassMap] [expr : s-expression]) : ExprC
+  (cond
+    [(empty? classnames) (parse expr)]
+    [else
+     (appC (lam (list (first classnames))
+                     (inject-and-parse (rest classnames) classes expr))
+                (list
+                 (type-case (optionof Class) (hash-ref classes (first classnames))
+                   [some (s) (appC (lam (list (first classnames))
+                                        (setC (first classnames) (class-constructor s)))
+                                   (list (numC 0)))]
+                   [none () (error 'inject "Class not found")])))]))
+ 
+;; Not a use case - just for test coverage
+(test/exn (inject-and-parse (list 'dummy) basic-classes `true) "Class not found")
+
+;; Parse a program with class definitions
 (define (parse-prog [classdefs : (listof s-expression)] [expr : s-expression]) : ExprC
-  (local [(define (parse-classes classes defs)
-            (cond
-              [(empty? defs) classes]
-              [else (parse-classes (parse-class classes (first defs)) (rest defs))]))]
-    (parse (parse-classes basic-classes classdefs) expr)))
+  (if (empty? classdefs)
+      (parse expr)
+      (local [(define (parse-classes classes defs)
+                (cond
+                  [(empty? defs) classes]
+                  [else (parse-classes (parse-class classes (first defs)) (rest defs))]))]
+        (inject-and-parse 
+         (cons 'Object (map (lambda (def) (s-exp->symbol (second (s-exp->list def)))) classdefs))
+         (parse-classes basic-classes classdefs) 
+         expr))))
 
 ;; Test cases
 (test (parse-prog empty `true) (boolC true))
@@ -344,11 +377,11 @@
 (test (parse-prog empty `abc) (idC 'abc))
 (test (parse-prog empty `"abc") (strC "abc"))
 (test (parse-prog empty `(f 5 6)) (appC (idC 'f) (list (numC 5) (numC 6))))
-(test (parse-prog empty `{array 5 1}) (arrayC (numC 5) (numC 1)))
-(test (parse-prog empty `{ref (array 2 0)[1]}) (refC (arrayC (numC 2) (numC 0)) (numC 1)))
-(test (parse-prog empty `{(array 2 0)[1] <- 10})
+(test (parse-prog empty `{new-array 5 1}) (arrayC (numC 5) (numC 1)))
+(test (parse-prog empty `{ref (new-array 2 0)[1]}) (refC (arrayC (numC 2) (numC 0)) (numC 1)))
+(test (parse-prog empty `{(new-array 2 0)[1] <- 10})
       (arr-setC (arrayC (numC 2) (numC 0)) (numC 1) (numC 10)))
-(test (parse-prog empty `(with {arr = (array 3 0)}
+(test (parse-prog empty `(with {arr = (new-array 3 0)}
                     {arr[1] <- {ref arr[1]}}))
       (appC (lam (list 'arr) (arr-setC (idC 'arr) 
                                        (numC 1) 
@@ -366,10 +399,10 @@
 (test (parse-prog empty `(fn {} 6)) (lam (list) (numC 6)))
 
 ;; Exception testing
-(test/exn (parse-prog empty `(new fake)) "Class not found")
 (test/exn (parse-prog (list `(class fake)) `(new fake)) "Function does not match classdef specification")
 (test/exn (parse-prog (list `(class fake extends Nothing {fields a})) `(new fake)) "Nothing not declared")
 (test/exn (parse-prog empty `(if 4 5)) "Syntax does not match EBNF spec")
+(test/exn (parse-prog empty `(rec (with = 34) 3)) "Reserved word cannot be used as identifier")
 (test/exn (parse-prog empty `(fn {a -} {- a -})) "Reserved word cannot be used as identifier")
 (test/exn (parse-prog empty `(fn {a a} {- a a})) "Argument identifiers are not unique")
 (test/exn (parse-prog empty `(13 - 10)) "Reserved word cannot be used as identifier")
@@ -523,12 +556,12 @@
                                     ((fn (c) (a (b c))) 10))
                                 (fn (num) (a num))))
                            (fn (num) (* num num)))) (num 10000))
-(test (test-interp empty `{array (+ 2 3) 1}) (array 0 5))
-(test (test-interp empty `{ref (array 2 0)[0]}) (num 0))
-(test (test-interp empty `{ref (array 2 0)[1]}) (num 0))
-(test (test-interp empty `{(array 3 0)[1] <- 2})
+(test (test-interp empty `{new-array (+ 2 3) 1}) (array 0 5))
+(test (test-interp empty `{ref (new-array 2 0)[0]}) (num 0))
+(test (test-interp empty `{ref (new-array 2 0)[1]}) (num 0))
+(test (test-interp empty `{(new-array 3 0)[1] <- 2})
       (num 2))
-(test (test-interp empty `(with {arr = (array 3 0)}
+(test (test-interp empty `(with {arr = (new-array 3 0)}
                                 {arr[1] <- (+ {ref arr[1]} 2)}))
       (num 2))
 (test (test-interp empty `({fn (a b) (a <- b)} 6 4))
@@ -543,19 +576,19 @@
 
 ;; Exception testing
 (test/exn (test-interp empty `(l <- 12)) "Unbound Identifier")
-(test/exn (test-interp empty `(ref (array 10 3)[15])) "Array index out of bounds: 15")
-(test/exn (test-interp empty `((array 10 3)[15] <- 9)) "Array index out of bounds: 15")
+(test/exn (test-interp empty `(ref (new-array 10 3)[15])) "Array index out of bounds: 15")
+(test/exn (test-interp empty `((new-array 10 3)[15] <- 9)) "Array index out of bounds: 15")
 (test/exn (test-interp empty `(ref 10[15])) "Not a array: 10")
 (test/exn (test-interp empty `(10[15] <- 9)) "Not a array: 10")
-(test/exn (test-interp empty `(ref (array 10 3)[true])) "Not a number: true")
-(test/exn (test-interp empty `((array 10 3)[true] <- 9)) "Not a number: true")
+(test/exn (test-interp empty `(ref (new-array 10 3)[true])) "Not a number: true")
+(test/exn (test-interp empty `((new-array 10 3)[true] <- 9)) "Not a number: true")
 (test/exn (test-interp empty `(with (res = (if (<= (/ 9 3) (+ 1 1)) 10 11))
                         (res))) "Not a function: 11")
 (test/exn (interp (appC (numC 10) (list (numC 12))) empty-env empty-sto)
           "Not a function: 10")
 (test/exn (test-interp empty `(if {<= a b} 19 (if {eq? c d} 20 21)))
                  "Unbound Identifier")
-(test/exn (test-interp empty `(array true 10)) "Not a number: true")
+(test/exn (test-interp empty `(new-array true 10)) "Not a number: true")
 (test/exn (test-interp empty `(/ true 0)) "Not a number: true")
 (test/exn (test-interp empty `(if 10 1 0)) "Not a boolean: 10")
 (test/exn (test-interp empty `(/ 12 0)) "Division of 12 by zero")
@@ -568,7 +601,7 @@
 (test/exn (test-interp empty `((fn () 6) 1 2 3)) "Incorrect number of arguments")
 (test/exn (test-interp empty `(begin)) "No expressions to execute")
 
-(test (top-eval empty `(eq? (array 2 2) (array 2 3))) "false")
+(test (top-eval empty `(eq? (new-array 2 2) (new-array 2 3))) "false")
 (test (top-eval empty `(with 
                   (make-incr = (fn (x) (fn () (begin (x <- (+ x 1)) x)))) 
                   (with (incr = (make-incr 23)) 
@@ -586,14 +619,14 @@
                                           (if (begin (a! 2) true) 
                                               (a! 3)
                                               (/ 1 0))
-                                          (array (a! 4) (fn () (a! 5)))))))
+                                          (new-array (a! 4) (fn () (a! 5)))))))
       "#<array>")
 
 (test (top-eval empty `(with (a = 1)
                              (b = 23)
                              (array-length = 30)
                              (array-initVal = false)
-                             (with (my-array = (array array-length array-initVal))
+                             (with (my-array = (new-array array-length array-initVal))
                                    (diff = (fn (x y) (- x y)))
                                    (begin (if (eq? (diff (+ 3 4) (* 2 3)) 1) 
                                               (a <- 19) 
@@ -611,9 +644,9 @@
                                  {if {begin {a! 2} true}
                                      {a! 3}
                                      {/ 1 0}}
-                                 {array {begin {a! 4} 34}
+                                 {new-array {begin {a! 4} 34}
                                             {begin {a! 5} false}}
-                                 {{begin {a! 6} {array 3 false}}
+                                 {{begin {a! 6} {new-array 3 false}}
                                   [{begin {a! 7} 2}]
                                   <- {begin {a! 8} 98723}}
                                  {with {p = 9}
@@ -634,12 +667,12 @@
                          {method get-xyz {} {* x {* y z}}}})
       `{with {obj = {new B 1 2 3}}
              {obj2 = {new A 4 5}}
-             {begin {if {eq? {send obj2 "get-y"} 5} true fail1}
-                    {if {eq? {send obj2 "mult-x" 2} 8} true fail2}
-                    {if {eq? {send obj "get-y"} 2} true fail3}
-                    {if {eq? {send obj "get-xyz"} 6} true fail4}}})
+             {begin {if {eq? {send obj2 get-y} 5} true fail1}
+                    {if {eq? {send obj2 mult-x 2} 8} true fail2}
+                    {if {eq? {send obj get-y} 2} true fail3}
+                    {if {eq? {send obj get-xyz} 6} true fail4}}})
       "true")
 (test (top-eval empty 
                 `(rec {foo = {fn {i} {if {<= i 1} 1 {* i {foo {- i 1}}}}}}
                    {foo 4}))
-      "24")
+      "24") 
