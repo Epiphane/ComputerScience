@@ -10,7 +10,7 @@
 #include "secret.h"
 
 /*
- * Function prototypes for the hello driver.
+ * Function prototypes for the secret driver.
  */
 FORWARD _PROTOTYPE( char * secret_name,   (void) );
 FORWARD _PROTOTYPE( int secret_ioctl,      (struct driver *d, message *m) );
@@ -71,6 +71,8 @@ PRIVATE int secret_ioctl(d, m)
     if (m->REQUEST == SSGRANT) {
         res = sys_safecopyfrom(m->IO_ENDPT, (vir_bytes)m->IO_GRANT,
                                0, (vir_bytes)&grantee, sizeof(grantee), D);
+        if (res)
+            return res;
 
         secret_owner = grantee;
 
@@ -90,6 +92,7 @@ PRIVATE int secret_open(d, m)
     err = getnucred(m->IO_ENDPT, &ucreds);
     if (err) {
        fprintf(stderr, "Error getting ucred: %s\n", strerror(errno));
+       return errno;
     }
 
     if ((m->REQUEST & (R_BIT | W_BIT)) == R_BIT) {
@@ -171,6 +174,7 @@ PRIVATE int secret_transfer(proc_nr, opcode, position, iov, nr_req)
             ret = sys_safecopyto(proc_nr, iov->iov_addr, 0,
                                 (vir_bytes) (secret_message + position.lo),
                                  bytes, D);
+
             iov->iov_size -= bytes;
             break;
 
@@ -271,23 +275,15 @@ PRIVATE void sef_local_startup()
 
 PRIVATE int sef_cb_init(int type, sef_init_info_t *info)
 {
-/* Initialize the hello driver. */
+/* Initialize the secret driver. */
     int do_announce_driver = TRUE;
 
     secret_isopen = 1;
     secret_size = open_fds = 0;
-    switch(type) {
-        case SEF_INIT_FRESH:
-        break;
-
-        case SEF_INIT_LU:
-            /* Restore the state. */
-            lu_state_restore();
-            do_announce_driver = FALSE;
-        break;
-
-        case SEF_INIT_RESTART:
-        break;
+    if(type == SEF_INIT_LU) {
+        /* Restore the state. */
+        lu_state_restore();
+        do_announce_driver = FALSE;
     }
 
     /* Announce we are up when necessary. */
