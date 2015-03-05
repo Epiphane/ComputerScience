@@ -27,10 +27,10 @@ void main()
     }
     else if (uShadeModel == 0) {
         // Goraud
-        vec4 worldSpace = uViewMatrix * uModelMatrix * aPosition;
-        gl_Position = uProjMatrix * worldSpace;
+        vec4 worldSpace = uModelMatrix * aPosition;
+        gl_Position = uProjMatrix * uViewMatrix * worldSpace;
         
-        vec3 normal = normalize((uViewMatrix * uModelMatrix * vec4(aNormal, 0)).xyz);
+        vec3 normal = normalize((uModelMatrix * vec4(aNormal, 0)).xyz);
         vec3 lightVector = normalize(uLightPos - worldSpace.xyz);
         
         float Id = dot(normal, lightVector);
@@ -40,10 +40,10 @@ void main()
     }
     else {
         // Phong
-        vWorldSpace = uViewMatrix * uModelMatrix * aPosition;
+        vWorldSpace = uModelMatrix * aPosition;
         gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
         
         
-        vNormal = (uViewMatrix * uModelMatrix * vec4(aNormal, 0)).xyz;
+        vNormal = (uModelMatrix * vec4(aNormal, 0)).xyz;
     }
 }

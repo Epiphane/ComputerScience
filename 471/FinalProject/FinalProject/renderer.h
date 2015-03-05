@@ -1,0 +1,60 @@
+#ifndef ____shader__
+#define ____shader__
+
+#include <string>
+#include <glm/glm.hpp>
+
+const int VERTEX_BUFFER = 0;
+const int COLOR_BUFFER = 1;
+const int NORMAL_BUFFER = 2;
+const int INDICES_BUFFER = 3;
+
+void shaders_init();
+
+unsigned int LoadShaders(const char *vertFilePath, const char *geomFilePath, const char *fragFilePath);
+
+class Renderer;
+
+// Shader programs
+
+typedef struct Program {
+    int programID;
+    Renderer *(* create)();
+    void(* bufferData)(Renderer *p, int type, long elements, void *data);
+    void(* render)(Renderer *p);
+} Program;
+
+extern Program *Program3D;
+
+// Renderers
+
+class Renderer {
+private:
+    unsigned int *buffers;
+    unsigned int elements;
+    
+    int numBuffers;
+    
+public:
+    Renderer(int numBuffers);
+    ~Renderer();
+    
+    unsigned int getNumElements() { return elements; }
+    void setNumElements(unsigned long num) { elements = num; }
+    
+    unsigned int getBuffer(int num) { return buffers[num]; }
+    
+    /* Rendering functions */
+    Program *program;
+    void bufferData(int type, long num, void *data) { program->bufferData(this, type, num, data); }
+    void render() { program->render(this); }
+    void pushMatrix();
+    void popMatrix();
+    void setView(glm::mat4 view);
+    
+    /* Transformation functions */
+    void transform(glm::mat4 t) { MVP = t * MVP; }
+    glm::mat4 MVP;
+};
+
+#endif
