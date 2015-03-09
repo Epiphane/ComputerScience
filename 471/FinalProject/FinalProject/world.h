@@ -15,6 +15,7 @@
 class World {
 private:
     Entity *coasterCar;
+    Entity *track;
     Renderer *renderer;
     
 public:

@@ -19,18 +19,9 @@ varying vec4 vWorldSpace;
 
 void main()
 {
-    if (1 == 1) {
-        vec4 worldSpace = uViewMatrix * uModelMatrix * aPosition;
-        gl_Position = uProjMatrix * worldSpace;
-        
-        vColor = 0.5 * normalize(aNormal) + 0.5;
-    }
-    else {
-        // Phong
-        vWorldSpace = uViewMatrix * uModelMatrix * aPosition;
-        gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
+    vWorldSpace = uViewMatrix * uModelMatrix * aPosition;
+    gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
         
         
-        vNormal = (uViewMatrix * uModelMatrix * vec4(aNormal, 0)).xyz;
-    }
+    vNormal = (uViewMatrix * uModelMatrix * vec4(aNormal, 0)).xyz;
 }

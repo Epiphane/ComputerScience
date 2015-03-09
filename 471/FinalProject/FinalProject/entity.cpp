@@ -13,21 +13,19 @@
 
 using namespace std;
 
-Entity::Entity() {
+Entity::Entity() : Model(glm::mat4(1)) {
     renderers.clear();
+    children.clear();
 };
 
 void Entity::load(const char *filename) {
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    
     string err = tinyobj::LoadObj(shapes, materials, filename);
     if(!err.empty()) {
         cerr << err << endl;
     }
     resize_obj(shapes);
     
-    for(int s = 0; s < 1; s ++) {//shapes.size(); s ++) {
+    for(int s = 0; s < shapes.size(); s ++) {
         const vector<float> &posBuf = shapes[s].mesh.positions;
         
         vector<float> norBuf;
@@ -83,6 +81,18 @@ void Entity::load(const char *filename) {
     }
 }
 
+Renderer *Entity::getRenderer(int num) {
+    return renderers[num];
+}
+
+void Entity::addChild(Entity *e) {
+    children.push_back(e);
+}
+
+void Entity::transform(glm::mat4 mat) {
+    Model *= mat;
+}
+
 void Entity::update() {
     
 }
@@ -90,5 +100,13 @@ void Entity::update() {
 void Entity::render() {
     std::vector<Renderer *>::iterator renderer;
     for (renderer = renderers.begin(); renderer != renderers.end(); renderer ++)
-        (*renderer)->render();
+        (*renderer)->render(Model);
+    
+    Renderer::pushMatrix(Model);
+    
+    std::vector<Entity *>::iterator child;
+    for (child = children.begin(); child != children.end(); child ++)
+        (*child)->render();
+    
+    Renderer::popMatrix();
 }

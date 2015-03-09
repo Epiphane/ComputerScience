@@ -9,6 +9,10 @@ const int COLOR_BUFFER = 1;
 const int NORMAL_BUFFER = 2;
 const int INDICES_BUFFER = 3;
 
+typedef unsigned int Material;
+const Material MATERIAL_RUBBER = 0;
+const Material MATERIAL_METAL = 1;
+
 void shaders_init();
 
 unsigned int LoadShaders(const char *vertFilePath, const char *geomFilePath, const char *fragFilePath);
@@ -21,7 +25,7 @@ typedef struct Program {
     int programID;
     Renderer *(* create)();
     void(* bufferData)(Renderer *p, int type, long elements, void *data);
-    void(* render)(Renderer *p);
+    void(* render)(Renderer *p, glm::mat4 Model);
 } Program;
 
 extern Program *Program3D;
@@ -47,14 +51,13 @@ public:
     /* Rendering functions */
     Program *program;
     void bufferData(int type, long num, void *data) { program->bufferData(this, type, num, data); }
-    void render() { program->render(this); }
-    void pushMatrix();
-    void popMatrix();
+    void render(glm::mat4 Model) { program->render(this, Model); }
     void setView(glm::mat4 view);
     
-    /* Transformation functions */
-    void transform(glm::mat4 t) { MVP = t * MVP; }
-    glm::mat4 MVP;
+    static void pushMatrix(glm::mat4 matrix);
+    static void popMatrix();
+    
+    Material mat;
 };
 
 #endif

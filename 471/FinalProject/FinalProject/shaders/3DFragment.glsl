@@ -14,15 +14,10 @@ uniform int uShowNormal;
 
 void main()
 {
-    if (1 == 1) {
-        gl_FragColor = vec4(vColor, 1);
-    }
-    else {
-        vec3 lightVector = normalize(uLightPos - vWorldSpace.xyz);
+    vec3 lightVector = normalize(uLightPos - vWorldSpace.xyz);
         
-        float Id = dot(normalize(vNormal), lightVector);
-        float Is = pow(dot(normalize(vNormal), normalize(lightVector - vWorldSpace.xyz)), Ushine);
-        
-        gl_FragColor = vec4(Is * UsColor + Id * UdColor + UaColor, 1);
-    }
+    float Id = dot(normalize(vNormal), lightVector);
+    float Is = 0.0 * pow(dot(normalize(vNormal), normalize(lightVector - vWorldSpace.xyz)), Ushine);
+    
+    gl_FragColor = vec4(Is * UsColor + Id * UdColor + UaColor, 1);
 }

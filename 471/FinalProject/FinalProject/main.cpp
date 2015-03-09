@@ -462,15 +462,12 @@ int main(int argc, char **argv) {
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     
     glEnable (GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     glClearColor(0.6f, 0.6f, 0.8f, 1.0f);
     
-    loadShapes("models/bunny.obj");
-//    installShaders("shaders/3DVertex.glsl", "shaders/3DFragment.glsl");
-    
     shaders_init();
-    initGL();
     
     world = new World("nothing.txt");
     
@@ -478,8 +475,8 @@ int main(int argc, char **argv) {
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-//        drawGL();
         world->render();
+        assert(glGetError() == GL_NO_ERROR);
         
         // Swap buffers
         glfwSwapBuffers(window);

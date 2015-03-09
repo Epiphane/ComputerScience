@@ -35,7 +35,7 @@ GLuint *createBuffers(int num) {
 }
 
 // Program constructor/destructor
-Renderer::Renderer(int numBuffers) : numBuffers(numBuffers), buffers(createBuffers(numBuffers)), elements(0), MVP(glm::mat4(1.0f)) {};
+Renderer::Renderer(int numBuffers) : numBuffers(numBuffers), buffers(createBuffers(numBuffers)), elements(0) {};
 Renderer::~Renderer() {
     glDeleteBuffers(numBuffers, buffers);
 }
@@ -48,16 +48,35 @@ void Renderer::setView(glm::mat4 view) {
     View = view;
 }
 
-void Renderer::pushMatrix() {
+void Renderer::pushMatrix(glm::mat4 matrix) {
     MatrixStack.push(currentMVP);
     
-    currentMVP *= MVP;
+    currentMVP *= matrix;
 }
 
 void Renderer::popMatrix() {
     currentMVP = MatrixStack.top();
     
     MatrixStack.pop();
+}
+
+void setMaterial(Material mat, GLuint uDColor, GLuint uSColor, GLuint uAColor, GLuint uShine) {
+    switch(mat) {
+        case MATERIAL_METAL:
+            glUniform3f(Program3D_uAColor, 0.15, 0.15, 0.15);
+            glUniform3f(Program3D_uDColor, 0.4, 0.4, 0.4);
+            glUniform3f(Program3D_uSColor, 0.14, 0.14, 0.14);
+            glUniform1f(Program3D_uShine, 76.8);
+            break;
+        case MATERIAL_RUBBER:
+            glUniform3f(Program3D_uAColor, 0, 0, 0);//2, 0.02, 0.02);
+            glUniform3f(Program3D_uDColor, 0, 0, 0);//.01, 0.01, 0.01);
+            glUniform3f(Program3D_uSColor, 0.4, 0.4, 0.4);
+            glUniform1f(Program3D_uShine, -100.0);
+            break;
+        default:
+            std::cerr << "Error: Material " << mat << " not found" << std::endl;
+    }
 }
 
 void setUniforms(GLuint uWinScale, GLuint uPerspective, GLuint uView, GLuint uModel, glm::mat4 MVP) {
@@ -87,9 +106,9 @@ void shaders_init() {
     Program3D_uProj = glGetUniformLocation(Program3D->programID, "uProjMatrix");
     Program3D_uModel = glGetUniformLocation(Program3D->programID, "uModelMatrix");
     Program3D_uView = glGetUniformLocation(Program3D->programID, "uViewMatrix");
-    Program3D_uSColor = glGetUniformLocation(Program3D->programID, "UsColor");
-    Program3D_uDColor = glGetUniformLocation(Program3D->programID, "UdColor");
     Program3D_uAColor = glGetUniformLocation(Program3D->programID, "UaColor");
+    Program3D_uDColor = glGetUniformLocation(Program3D->programID, "UdColor");
+    Program3D_uSColor = glGetUniformLocation(Program3D->programID, "UsColor");
     Program3D_uLightPos = glGetUniformLocation(Program3D->programID, "uLightPos");
     Program3D_uShine = glGetUniformLocation(Program3D->programID, "uShine");
     Program3D_aNormal = glGetAttribLocation(Program3D->programID, "aNormal");
@@ -98,6 +117,7 @@ void shaders_init() {
     Program3D->create = [] () {
         Renderer *prog = new Renderer(3);
         prog->program = Program3D;
+        prog->mat = MATERIAL_METAL;
         
         return (Renderer *)prog;
     };
@@ -128,18 +148,15 @@ void shaders_init() {
         glBufferData(bufType, scalar * num, data, GL_STATIC_DRAW);
     };
     
-    Program3D->render = [] (Renderer *p) {
+    Program3D->render = [] (Renderer *p, glm::mat4 Model) {
         glUseProgram(Program3D->programID);
         
         // Send window scale
-        setUniforms(Program3D_uWinScale, Program3D_uProj, Program3D_uView, Program3D_uModel, p->MVP);
+        setUniforms(Program3D_uWinScale, Program3D_uProj, Program3D_uView, Program3D_uModel, Model);
         
-        glUniform3f(Program3D_uAColor, 0.02, 0.02, 0.1);
-        glUniform3f(Program3D_uDColor, 0.0, 0.08, 0.5);
-        glUniform3f(Program3D_uSColor, 0.14, 0.14, 0.4);
-        glUniform1f(Program3D_uShine, 120.0);
+        setMaterial(p->mat, Program3D_uDColor, Program3D_uSColor, Program3D_uAColor, Program3D_uShine);
         
-        glUniform3f(Program3D_uLightPos, 5, 2, 3);
+        glUniform3f(Program3D_uLightPos, 5, 2, 33);
         
         // Bind attributes...
         // XYZ Position
@@ -151,8 +168,6 @@ void shaders_init() {
         glEnableVertexAttribArray(Program3D_aNormal);
         glBindBuffer(GL_ARRAY_BUFFER, p->getBuffer(1));
         glVertexAttribPointer(Program3D_aNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        
-//        std::cout << glm::vec3(Program3D_aPosition, Program3D_aNormal, -Program3D->programID) << std::endl;
         
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p->getBuffer(2));
         glDrawElements(GL_TRIANGLES, p->getNumElements(), GL_UNSIGNED_INT, 0);
