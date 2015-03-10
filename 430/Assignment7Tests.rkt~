@@ -209,7 +209,7 @@
 (define (getnum n)
   (if (num? n) (num-n n) (error 'type "Not a number")))
 ;; Code coverage
-(test/exn (getnum "Hello") "Not a number")
+(test/exn (getnum (id 'hello)) "Not a number")
 
 ;; Main interpretation function
 (define (interp [expr : ExprC] [env : Environment]) : Value
