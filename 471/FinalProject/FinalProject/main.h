@@ -13,6 +13,8 @@
 #include <glm/glm.hpp>
 #include "tiny_obj_loader.h"
 
+#define MATH_PI 3.1415926535897932384626433832795
+
 const extern int w_width;
 const extern int w_height;
 

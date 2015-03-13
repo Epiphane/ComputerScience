@@ -9,6 +9,7 @@
 #include <glm/ext.hpp>
 using namespace std;
 
+#include "camera.h"
 #include "renderer.h"
 #include "main.h"
 
@@ -23,7 +24,7 @@ GLuint LoadShaders(const char *vertFilePath, const char *geomFilePath, const cha
 Program *Program3D = NULL;
 GLuint Program3D_uWinScale, Program3D_uProj, Program3D_uModel, Program3D_uView;
 GLuint Program3D_uLightPos, Program3D_uAColor, Program3D_uDColor;
-GLuint Program3D_uSColor, Program3D_uShine;
+GLuint Program3D_uSColor, Program3D_uShine, Program3D_uBend;
 GLuint Program3D_aPosition, Program3D_aNormal;
 
 GLuint *createBuffers(int num) {
@@ -40,13 +41,9 @@ Renderer::~Renderer() {
     glDeleteBuffers(numBuffers, buffers);
 }
 
-glm::mat4 Projection, View;
+glm::mat4 Projection;
 glm::mat4 currentMVP;
 std::stack<glm::mat4> MatrixStack;
-
-void Renderer::setView(glm::mat4 view) {
-    View = view;
-}
 
 void Renderer::pushMatrix(glm::mat4 matrix) {
     MatrixStack.push(currentMVP);
@@ -88,6 +85,8 @@ void setUniforms(GLuint uWinScale, GLuint uPerspective, GLuint uView, GLuint uMo
     // Send camera projection
     MVP = currentMVP * MVP;
     
+    glm::mat4 View = camera_getMatrix();
+    
     glUniformMatrix4fv(uModel, 1, GL_FALSE, &MVP[0][0]);
     glUniformMatrix4fv(uView, 1, GL_FALSE, &View[0][0]);
     glUniformMatrix4fv(uPerspective, 1, GL_FALSE, &Projection[0][0]);
@@ -111,6 +110,7 @@ void shaders_init() {
     Program3D_uSColor = glGetUniformLocation(Program3D->programID, "UsColor");
     Program3D_uLightPos = glGetUniformLocation(Program3D->programID, "uLightPos");
     Program3D_uShine = glGetUniformLocation(Program3D->programID, "uShine");
+    Program3D_uBend = glGetUniformLocation(Program3D->programID, "uBend");
     Program3D_aNormal = glGetAttribLocation(Program3D->programID, "aNormal");
     Program3D_aPosition = glGetAttribLocation(Program3D->programID, "aPosition");
     
@@ -153,6 +153,7 @@ void shaders_init() {
         
         // Send window scale
         setUniforms(Program3D_uWinScale, Program3D_uProj, Program3D_uView, Program3D_uModel, Model);
+        glUniform3f(Program3D_uBend, p->bend.x, p->bend.y, p->bend.z);
         
         setMaterial(p->mat, Program3D_uDColor, Program3D_uSColor, Program3D_uAColor, Program3D_uShine);
         

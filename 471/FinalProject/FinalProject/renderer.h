@@ -52,12 +52,12 @@ public:
     Program *program;
     void bufferData(int type, long num, void *data) { program->bufferData(this, type, num, data); }
     void render(glm::mat4 Model) { program->render(this, Model); }
-    void setView(glm::mat4 view);
     
     static void pushMatrix(glm::mat4 matrix);
     static void popMatrix();
     
     Material mat;
+    glm::vec3 bend;
 };
 
 #endif

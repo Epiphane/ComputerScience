@@ -18,6 +18,8 @@ private:
     Entity *track;
     Renderer *renderer;
     
+    glm::vec2 cameraDir;
+    
 public:
     World(const char *filename);
     
