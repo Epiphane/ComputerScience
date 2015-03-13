@@ -18,11 +18,12 @@ private:
     std::vector<tinyobj::material_t> materials;
     
     unsigned int posBufObj, norBufObj, indBufObj;
-    glm::mat4 Model;
     
 protected:
     std::vector<Renderer *> renderers;
     std::vector<Entity *> children;
+    
+    glm::mat4 Model;
     
 public:
     Entity();

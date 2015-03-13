@@ -12,10 +12,16 @@
 #include "entity.h"
 
 class Track : public Entity {
+private:
+    Track *nextTrack;
+    
 public:
     Track();
     
-    void bend(float bend);
+    void bend(glm::vec3 bend);
+    void setNext(Track *child);
+    
+    void endRender();
 };
 
 #endif /* defined(__FinalProject__track__) */

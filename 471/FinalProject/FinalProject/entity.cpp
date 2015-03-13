@@ -107,6 +107,6 @@ void Entity::render() {
     std::vector<Entity *>::iterator child;
     for (child = children.begin(); child != children.end(); child ++)
         (*child)->render();
-    
+
     Renderer::popMatrix();
 }

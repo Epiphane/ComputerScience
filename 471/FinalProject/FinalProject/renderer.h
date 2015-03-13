@@ -35,7 +35,7 @@ extern Program *Program3D;
 class Renderer {
 private:
     unsigned int *buffers;
-    unsigned int elements;
+    unsigned long elements;
     
     int numBuffers;
     

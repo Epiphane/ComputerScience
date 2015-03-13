@@ -9,10 +9,13 @@
 ;;       | true/false
 ;;       | id
 ;;       | (if GUCI3 GUCI3 GUCI3)
-;;       | (with (id = GUCI3) ... GUCI3)
 ;;       | (fn (id ...) GUCI3)
 ;;       | (operator GUCI3 GUCI3
-;;       | (GUCI3 GUCI3 ...)
+;;       | (GUCI7 GUCI7 ...)
+;;       | (let-stx (id = ([pat-sexp => sexp] ...)) GUCI7)
+;; pat-sexp = any-id
+;;          | num
+;;          | (pat-sexp ...)
 ;; operator = +, -, *, /, eq?, <=
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -22,13 +25,13 @@
 ;; Represents a value
 (define-type Value
   [num (n : number)]
-  [id (i : symbol)]
   [bool (b : boolean)]
   [clos (args : (listof symbol)) (body : ExprC) (env : Environment)])
 
 ;; Represents an expression
 (define-type ExprC
   [val (v : Value)]
+  [idC (i : symbol)]
   [ifop (op : (number number -> boolean)) (l : ExprC) (r : ExprC)]
   [binop (op : (number number -> number)) (l : ExprC) (r : ExprC)]
   [ifC (cond : ExprC) (success : ExprC) (fail : ExprC)]
@@ -48,7 +51,6 @@
 (define (serialize [val : Value])
   (type-case Value val
     [num (n) (to-string n)]
-    [id (i) (symbol->string i)]
     [bool (b) (cond
                 [b "true"]
                 [else "false"])]
@@ -56,10 +58,34 @@
 
 ;; Test cases
 (test (serialize (num 32)) "32")
-(test (serialize (id 'abc)) "abc")
 (test (serialize (bool true)) "true")
 (test (serialize (bool false)) "false")
 (test (serialize (clos (list 'a) (binop + (val (num 5)) (val (num 2))) empty-env)) "#<procedure>")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Expansion
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Expand an s-expression using let-stx syntax
+(define (expand [expr : s-expression]) : s-expression
+  (local [(define exp-parts (s-exp->list expr))]
+    (cond 
+      [(equal? (first exp-parts) `let-stx)]
+      [else (list->s-exp (map expand exp-parts))])))
+
+;; Test cases
+(test (expand `{let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {or false {+ 12 1}}})
+      `{{fn {temp} {if temp temp {+ 12 1}}} false})
+(test (expand `{let-stx {rec = {[{rec a b} => {{+ rec a} {rec b}}]
+                                [{rec a} => {* 2 a}]}}
+                        {let-stx {if-not-a = {[{if-not-a a b} => {if a b a}]}}
+                                 {rec {if-not-a false 10} 12}}})
+      `{{+ {* 2 {if false 10 false}} {* 2 12}}})
+(test (expand `{let-stx {nothing = {}}
+                        {nothing 12 2}})
+      `{nothing 12 2})
+(test/exn (expand `{let-stx 10}) "Syntax does not match EBNF spec")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Parsing
@@ -81,7 +107,7 @@
     [else (none)]))
 
 ;; Reserved words
-(define reserved (list `fn `true `false `if `with `+ `- `* `/ `<= `eq? `=))
+(define reserved (list `fn `true `false `if `let-stx `+ `- `* `/ `<= `eq? `= `=>))
 
 ;; Converts an s-expression into a list of symbols
 (define (fn-args [exprs : (listof s-expression)]) : (listof symbol)
@@ -103,18 +129,11 @@
            [(equal? expr `false) (val (bool false))]
            [(member expr reserved)
             (error 'parse "Reserved word cannot be used as identifier")]
-           [else (val (id (s-exp->symbol expr)))])]
+           [else (idC (s-exp->symbol expr))])]
     [(s-exp-match? `(if ANY ANY ANY) expr) 
      (ifC (parse (second (s-exp->list expr)))
           (parse (third (s-exp->list expr)))
           (parse (fourth (s-exp->list expr))))]
-    [(s-exp-match? `(with {SYMBOL = ANY} ... ANY) expr)
-     (appC
-      (lam (fn-args (map (lambda (arg) (first (s-exp->list arg)))
-                               (reverse (rest (reverse (rest (s-exp->list expr)))))))
-                 (parse (first (reverse (s-exp->list expr)))))
-      (map (lambda (arg) (parse (third (s-exp->list arg))))
-           (reverse (rest (reverse (rest (s-exp->list expr)))))))]
     [(s-exp-match? `(fn {SYMBOL ...} ANY) expr)
      (lam (fn-args (s-exp->list (second (s-exp->list expr))))
                 (parse (third (s-exp->list expr))))]
@@ -132,8 +151,8 @@
                                  (parse (third (s-exp->list expr))))]
                [none () (cond [(member (first (s-exp->list expr)) reserved)
                                (error 'parse "Syntax does not match EBNF spec")]
-                              [else (appC (val (id (s-exp->symbol 
-                                               (first (s-exp->list expr)))))
+                              [else (appC (idC (s-exp->symbol 
+                                                (first (s-exp->list expr))))
                                           (map (lambda (arg) (parse arg))
                                                (rest (s-exp->list expr))))])])])]
     [(s-exp-match? `(ANY ...) expr)
@@ -141,7 +160,7 @@
        [(member (first (s-exp->list expr)) reserved)
         (error 'parse "Syntax does not match EBNF spec")]
        [(s-exp-symbol? (first (s-exp->list expr)))
-        (appC (val (id (s-exp->symbol (first (s-exp->list expr)))))
+        (appC (idC (s-exp->symbol (first (s-exp->list expr))))
               (map (lambda (arg) (parse arg))
                    (rest (s-exp->list expr))))]
        [else 
@@ -152,28 +171,28 @@
 ;; Test cases
 (test (parse `true) (val (bool true)))
 (test (parse `false) (val (bool false)))
-(test (parse `((g 15) 10)) (appC (appC (val (id 'g)) (list (val (num 15)))) 
+(test (parse `((g 15) 10)) (appC (appC (idC 'g) (list (val (num 15)))) 
                                  (list (val (num 10)))))
 (test (parse `134) (val (num 134)))
-(test (parse `abc) (val (id 'abc)))
+(test (parse `abc) (idC 'abc))
 (test (parse `(if {<= a b} 19 21)) 
       (ifC (ifop <=
-                  (val (id 'a))
-                  (val (id 'b)))
+                  (idC 'a)
+                  (idC 'b))
            (val (num 19))
            (val (num 21))))
-(test (parse `(with (a = (+ 4 6)) (b = 12) (* a b)))
-      (appC (lam (list 'a 'b)
-                 (binop * (val (id 'a)) (val (id 'b))))
-            (list (binop + (val (num 4)) (val (num 6))) (val (num 12)))))
 (test (parse `(fn {} 6)) (lam (list) (val (num 6))))
+(test (parse `{let-stx {or = [{or a b} => {{fn {temp} {if temp temp b}} a}]}
+                       {or false {+ 12 1}}})
+      (appC (lam (list 'val) (ifC (idC 'val) 
+                                  (idC 'val) 
+                                  (binop + (val (num 12)) (val (num 1))))) 
+            (list (val (bool false)))))
 
 ;; Exception testing
 (test/exn (parse `(fn {a -} {- a -}))
           "Reserved word cannot be used as identifier")
-(test/exn (parse `(with 1 2)) "Syntax does not match EBNF spec")
 (test/exn (parse `(fn {a a} {- a a})) "Argument identifiers are not unique")
-(test/exn (parse `(with {a = 5})) "Reserved word cannot be used as identifier")
 (test/exn (parse `(fn {* a a})) "Syntax does not match EBNF spec")
 (test/exn (parse `(if (<= 5 10) 'a 'b 'c)) "Syntax does not match EBNF spec")
 (test/exn (parse `if) "Reserved word cannot be used as identifier")
@@ -209,16 +228,15 @@
 (define (getnum n)
   (if (num? n) (num-n n) (error 'type "Not a number")))
 ;; Code coverage
-(test/exn (getnum (id 'hello)) "Not a number")
+(test/exn (getnum (bool true)) "Not a number")
 
 ;; Main interpretation function
 (define (interp [expr : ExprC] [env : Environment]) : Value
   (local [(define (find n) (find-symbol n env))]
     (local [(define (recur e) (interp e env))]
       (type-case ExprC expr
-        [val (v) (type-case Value v
-                   [id (name) (find name)]
-                   [else v])]
+        [idC (i) (find i)]
+        [val (v) v]
         [binop (op l r)
                (cond
                  [(equal? (recur r) (num 0)) (error 'binop "Division by zero")]
@@ -255,11 +273,6 @@
 
 ;; Basic EBNF Tests
 (test-interp `(if (eq? (- 10 5) 5) 10 11) (num 10))
-(test-interp `(with (val = 10)
-                    (fun = (fn (a b) (* a b)))
-                    (fun val 7)) (num 70))
-(test-interp `(with (val = (if (<= (/ 9 3) (+ 1 1)) 10 11))
-                    val) (num 11))
 (test-interp `(a*2b 10 3) (num 60))
 (test-interp `((fn (seven) (seven))
                ((fn (minus) (fn () (minus (+ 3 10) (* 2 3))))
@@ -269,10 +282,19 @@
                       ((fn (c) (a (b c))) 10))
                    (fn (num) (a num))))
                (fn (num) (* num num))) (num 10000))
+(test-interp `{let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {or false {+ 12 1}}}
+             (num 13))
+(test-interp `{let-stx {rec = {[{rec a b} => {{+ rec a} {rec b}}]
+                                [{rec a} => {* 2 a}]}}
+                        {let-stx {if-not-a = {[{if-not-a a b} => {if a b a}]}}
+                                 {rec {if-not-a false 10} 12}}}
+             (num 44))
+(test (expand `{let-stx {nothing = {}}
+                        {nothing 12 2}})
+      `{nothing 12 2})
 
 ;; Exception testing
-(test-interp/exn `(with (res = (if (<= (/ 9 3) (+ 1 1)) 10 11))
-                    (res)) "Application of number or boolean")
 (test/exn (interp (appC (val (num 10)) (list (val (num 12)))) test-env)
           "Application of number or boolean")
 (test-interp/exn `(/ 12 0) "Division by zero")
