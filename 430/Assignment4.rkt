@@ -3,23 +3,17 @@
 (print-only-errors #t)
 (require plai-typed/s-exp-match)
 
-;; Gucci Lang v4
+;; Gucci Lang v3
 ;; EBNF Specification:
-;; GUCI4 = num
-;;       | true
-;;       | false
+;; GUCI3 = num
+;;       | true/false
 ;;       | id
-;;       | {new-array GUCI4 GUCI4}
-;;       | {ref GUCI4[GUCI4]}
-;;       | {GUCI4[GUCI4] <- GUCI4}
-;;       | {id <- GUCI4}
-;;       | {begin GUCI4 GUCI4 ...}
-;;       | {if GUCI4 GUCI4 GUCI4}
-;;       | {with {id = GUCI4} ... GUCI4}
-;;       | {fn {id ...} GUCI4}
-;;       | {operator GUCI4 GUCI4}
-;;       | {GUCI4 GUCI4 ...}
-;; operator	=	+, -, *, /, eq?, <=
+;;       | (if GUCI3 GUCI3 GUCI3)
+;;       | (with (id = GUCI3) ... GUCI3)
+;;       | (fn (id ...) GUCI3)
+;;       | (operator GUCI3 GUCI3
+;;       | (GUCI3 GUCI3 ...)
+;; operator = +, -, *, /, eq?, <=
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Types
@@ -163,6 +157,162 @@
 (test/exn ((get-arith-op `<=) (bool true) (num 6)) "Not a number: true")
 (test/exn ((get-arith-op `<=) (num 6) (bool true)) "Not a number: true")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Expansion
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Expressions for let-stx
+(define-type pat-sexp
+  [pat-id (i : symbol)]
+  [pat-list (l : (listof pat-sexp))])
+(define-type sexp
+  [sexp-id (i : symbol)]
+  [sexp-num (n : number)]
+  [sexp-list (l : (listof sexp))])
+(define-type-alias stx (listof (pat-sexp * sexp)))
+(define empty-stx (list))
+
+;; Pattern matching checking
+(define (pat-sexp->matcher [pat : pat-sexp]) : s-expression
+  (type-case pat-sexp pat
+    [pat-id (i) `ANY]
+    [pat-list (l) (list->s-exp (map pat-sexp->matcher l))]))
+
+;; Get stx vars from s-expression
+(define-type-alias stx-vars (hashof symbol s-expression))
+(define empty-vars (hash (list)))
+(define (pat-sexp-env [expr : s-expression] [pat : pat-sexp] [env : stx-vars]) : stx-vars
+  (type-case pat-sexp pat
+    [pat-id (i) (hash-set env i expr)]
+    [pat-list (l)
+              (local [(define (recur exprs patlist env)
+                        (cond
+                          [(empty? exprs) env]
+                          [else (recur (rest exprs) 
+                                  (rest patlist)
+                                  (pat-sexp-env (first exprs) (first patlist) env))]))]
+                (recur (s-exp->list expr) l env))]))
+
+;; Substitute in stx vars
+(define (sexp-subst [exp : sexp] [vars : stx-vars]) : s-expression
+  (type-case sexp exp
+    [sexp-id (i) (type-case (optionof s-expression) (hash-ref vars i)
+                   [some (s) s]
+                   [none () (symbol->s-exp i)])]
+    [sexp-num (n) (number->s-exp n)]
+    [sexp-list (l) (list->s-exp (map (lambda (exp) (sexp-subst exp vars)) l))]))
+
+;; Convert an s-expression into pat-sexp and sexp
+(define (s-exp->pat-sexp [exp : s-expression]) : pat-sexp
+  (cond
+    [(s-exp-match? `SYMBOL exp) (pat-id (s-exp->symbol exp))]
+    [(s-exp-match? `{ANY ...} exp) (pat-list (map s-exp->pat-sexp (s-exp->list exp)))]
+    [else (error 'type "Could not convert s-expression to pat-sexp")]))
+(define (s-exp->sexp [exp : s-expression]) : sexp
+  (cond
+    [(s-exp-match? `SYMBOL exp) (sexp-id (s-exp->symbol exp))]
+    [(s-exp-match? `NUMBER exp) (sexp-num (s-exp->number exp))]
+    [(s-exp-match? `{ANY ...} exp) (sexp-list (map s-exp->sexp (s-exp->list exp)))]
+    #;[else (error 'type "Could not convert s-expression to sexp")]))
+;; Code coverage
+(test/exn (s-exp->pat-sexp `10) "Could not convert s-expression to pat-sexp")
+
+;; Substitute a stx s-expression given the environment hash
+(define (subst [expr : s-expression] [syn : stx] [env : (hashof symbol stx)])
+  (cond
+    [(empty? syn) (error 'expand "No matching syntax found")]
+    [(equal? (length (s-exp->list expr)) (length (pat-list-l (fst (first syn)))))
+     (local [(define syntax (first syn))]
+       (cond 
+         [(s-exp-match? (pat-sexp->matcher (fst syntax)) expr)
+          (local [(define vars (pat-sexp-env expr (fst syntax) empty-vars))]
+            (expand-stx (sexp-subst (snd syntax) vars) env))]
+         [else (subst expr (rest syn) env)]))]
+    [else (subst expr (rest syn) env)]))
+
+;; Expand an s-expression using let-stx syntax
+(define (expand-rules [exprs : (listof s-expression)] [h : stx])
+  (cond
+    [(empty? exprs) h]
+    [else (local [(define parts (s-exp->list (first exprs)))]
+            (append (list (values (s-exp->pat-sexp (first parts))
+                                  (s-exp->sexp (third parts))))
+                    (expand-rules (rest exprs) h)))]))
+(define (expand-stx [expr : s-expression] [env : (hashof symbol stx)]) : s-expression
+  (cond
+    ;; Is it a list?
+    [(s-exp-match? `{ANY ...} expr)
+     (local [(define exp-parts (s-exp->list expr)) (define (recur e) (expand-stx e env))]
+       (cond 
+         [(empty? exp-parts) expr]
+         [(equal? (first exp-parts) `let-stx)
+          (cond
+            [(s-exp-match? `{let-stx {SYMBOL = {[ANY => ANY] ...}} ANY} expr)
+             (expand-stx (third exp-parts) 
+                         (hash-set env
+                                   (s-exp->symbol (first (s-exp->list (second exp-parts))))
+                                   (expand-rules (s-exp->list (third (s-exp->list (second exp-parts)))) 
+                                                 empty-stx)))]
+            [else (error 'expand "Syntax does not match EBNF spec")])]
+         ;; Check for substitutions
+         [(s-exp-match? `SYMBOL (first exp-parts))
+          (type-case (optionof stx) (hash-ref env (s-exp->symbol (first exp-parts)))
+            [some (s) (subst expr s env)]
+            [none () (list->s-exp (map recur exp-parts))])]
+         [else (list->s-exp (map recur exp-parts))]))]
+    [else expr]))
+(define (expand [expr : s-expression])
+  (expand-stx expr (hash (list))))
+
+;; Test cases
+(test (expand `{}) `{})
+(test (expand `{let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {or false {+ 12 1}}})
+      `{{fn {temp} {if temp temp {+ 12 1}}} false})
+(test (expand `{let-stx {or = 
+                            {[{or a b c} => {nothing}]
+                             [{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {or false {+ 12 1}}})
+      `{{fn {temp} {if temp temp {+ 12 1}}} false})
+(test (expand `{let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {let-stx {nor = {[{nor a b} => {{fn {temp} {if temp temp b}} a}]}}
+                                 {or false {+ 12 1}}}})
+      `{{fn {temp} {if temp temp {+ 12 1}}} false})
+(test (expand `{let-stx {nor = {[{nor a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                                 {or false {+ 12 1}}}})
+      `{{fn {temp} {if temp temp {+ 12 1}}} false})
+(test (expand `{let-stx {nor = {[{nor a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                                 {or (nor false true) {+ 12 1}}}})
+      `{{fn {temp} {if temp temp {+ 12 1}}} {{fn {temp} {if temp temp true}} false}})
+(test (expand `{let-stx {rec = {[{rec a b} => {+ {rec a} {rec b}}]
+                                [{rec a} => {* 2 a}]}}
+                        {let-stx {if-not-a = {[{if-not-a a b} => {if a b a}]}}
+                                 {rec {if-not-a false 10} 12}}})
+      `{+ {* 2 {if false 10 false}} {* 2 12}})
+(test (expand `{let-stx {rec = {[{rec a b} => {+ {rec a} {rec b}}]
+                                [{rec a {b c}} => {wrong}]
+                                [{rec a} => {* 2 a}]}}
+                        {let-stx {if-not-a = {[{if-not-a a b} => {if a b a}]}}
+                                 {rec {if-not-a false 10} 12}}})
+      `{+ {* 2 {if false 10 false}} {* 2 12}})
+(test (expand `{let-stx {rec = {[{rec a {b c}} => {correct}]
+                                [{rec a b} => {+ {rec a} {rec b}}]
+                                [{rec a} => {* 2 a}]}}
+                        {let-stx {if-not-a = {[{if-not-a a b} => {if a b a}]}}
+                                 {rec {if-not-a false 10} {12 1}}}})
+      `{correct})
+#;(test (expand `{let-stx {nothing = {}}
+                        {nothing 12 2}})
+      `{nothing 12 2})
+(test/exn (expand '(let-stx (zip = (((zip a b c) => 234))) (zip 12))) "No matching syntax found")
+(test/exn (expand `{let-stx 10}) "Syntax does not match EBNF spec")
+(test (expand (quote (let-stx (s-eval = (((s-eval (a b)) => (+ (s-eval a) (s-eval b))) 
+                                         ((s-eval a) => a))) 
+                              (s-eval ((1 (2 3)) ((4 5) (6 7)))))))
+      `(+ (+ 1 (+ 2 3)) (+ (+ 4 5) (+ 6 7))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Parsing
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -182,7 +332,7 @@
                   (fn-args (rest exprs)))]))
 
 
-(define (parse [expr : s-expression]) : ExprC
+(define (parse-expr [expr : s-expression]) : ExprC
   (cond
     [(s-exp-match? `NUMBER expr) (numC (s-exp->number expr))]
     [(s-exp-match? `true expr) (boolC true)]
@@ -243,6 +393,8 @@
               (map (lambda (arg) (parse arg))
                    (rest (s-exp->list expr))))]))
 
+(define (parse [exp : s-expression]) : ExprC
+  (parse-expr (expand exp)))
 
 ;; Test cases
 (test (parse `true) (boolC true))
