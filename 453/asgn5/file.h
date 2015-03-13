@@ -9,11 +9,15 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define TRUE 1
+#define FALSE 0
+
 /* Partition table entry */
 #define MAX_PARTITIONS 4
 #define PARTITION_TABLE 0x1BE
 #define PARTITION_TABLE_SIG 510
 #define PARTITION_TABLE_SIG_LENGTH 2
+#define MINIX_PARTITION_BOOTABLE 0x80
 #define MINIX_PARTITION_TYPE 0x81
 #define BOOT_SECTOR_510 0x55
 #define BOOT_SECTOR_511 0xAA
@@ -84,6 +88,7 @@ struct direntry {
 
 /* File types */
 #define FILE_TYPE_MASK 0170000
+#define PERMISSION_STR_LEN 10
 #define REGULAR_FILE   0100000
 #define DIRECTORY      0040000
 #define P_OWNER_READ   0000400
@@ -97,6 +102,8 @@ struct direntry {
 #define P_OTHER_EXEC   0000001
 
 /* Functions defined in file.c */
-void open_fs(char *name, int partition, int subpartition, int verbose);
-struct inode *find_file(char *path);
-int read_file(char *buf, struct inode *file, unsigned int zone);
+void set_verbose(int verbose);
+void open_fs(char *name, int partition, int subpartition);
+void find_file(struct inode *file, char *path);
+void read_file(int fd, struct inode *file);
+void print_file(int fd, char *path, int directory);
