@@ -76,6 +76,36 @@
 (define-type-alias stx (listof (pat-sexp * sexp)))
 (define empty-stx (list))
 
+;; Pattern matching checking
+(define (pat-sexp->matcher [pat : pat-sexp]) : s-expression
+  (type-case pat-sexp pat
+    [pat-id (i) `ANY]
+    [pat-list (l) (list->s-exp (map pat-sexp->matcher l))]))
+
+;; Get stx vars from s-expression
+(define-type-alias stx-vars (hashof symbol s-expression))
+(define empty-vars (hash (list)))
+(define (pat-sexp-env [expr : s-expression] [pat : pat-sexp] [env : stx-vars]) : stx-vars
+  (type-case pat-sexp pat
+    [pat-id (i) (hash-set env i expr)]
+    [pat-list (l)
+              (local [(define (recur exprs patlist env)
+                        (cond
+                          [(empty? exprs) env]
+                          [else (recur (rest exprs) 
+                                  (rest patlist)
+                                  (pat-sexp-env (first exprs) (first patlist) env))]))]
+                (recur (s-exp->list expr) l env))]))
+
+;; Substitute in stx vars
+(define (sexp-subst [exp : sexp] [vars : stx-vars]) : s-expression
+  (type-case sexp exp
+    [sexp-id (i) (type-case (optionof s-expression) (hash-ref vars i)
+                   [some (s) s]
+                   [none () (symbol->s-exp i)])]
+    [sexp-num (n) (number->s-exp n)]
+    [sexp-list (l) (list->s-exp (map (lambda (exp) (sexp-subst exp vars)) l))]))
+
 ;; Convert an s-expression into pat-sexp and sexp
 (define (s-exp->pat-sexp [exp : s-expression]) : pat-sexp
   (cond
@@ -92,8 +122,17 @@
 (test/exn (s-exp->pat-sexp `10) "Could not convert s-expression to pat-sexp")
 
 ;; Substitute a stx s-expression given the environment hash
-(define (find-sexp-and-sub [expr : (listof s-expression)] [syntax : stx])
-  (list->s-exp expr))
+(define (subst [expr : s-expression] [syn : stx] [env : (hashof symbol stx)])
+  (cond
+    [(empty? syn) expr]
+    [(equal? (length (s-exp->list expr)) (length (pat-list-l (fst (first syn)))))
+     (local [(define syntax (first syn))]
+       (cond 
+         [(s-exp-match? (pat-sexp->matcher (fst syntax)) expr)
+          (local [(define vars (pat-sexp-env expr (fst syntax) empty-vars))]
+            (expand-stx (sexp-subst (snd syntax) vars) env))]
+         [else (subst expr (rest syn) env)]))]
+    [else (subst expr (rest syn) env)]))
 
 ;; Expand an s-expression using let-stx syntax
 (define (expand-rules [exprs : (listof s-expression)] [h : stx])
@@ -121,7 +160,7 @@
          ;; Check for substitutions
          [(s-exp-match? `SYMBOL (first exp-parts))
           (type-case (optionof stx) (hash-ref env (s-exp->symbol (first exp-parts)))
-            [some (s) (find-sexp-and-sub exp-parts s)]
+            [some (s) (subst expr s env)]
             [none () expr])]
          [else (list->s-exp (map recur exp-parts))]))]
     [else expr]))
@@ -132,7 +171,24 @@
 (test (expand `{let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
                         {or false {+ 12 1}}})
       `{{fn {temp} {if temp temp {+ 12 1}}} false})
-(test (expand `{let-stx {rec = {[{rec a b} => {{+ rec a} {rec b}}]
+(test (expand `{let-stx {or = 
+                            {[{or a b c} => {nothing}]
+                             [{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {or false {+ 12 1}}})
+      `{{fn {temp} {if temp temp {+ 12 1}}} false})
+(test (expand `{let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {let-stx {nor = {[{nor a b} => {{fn {temp} {if temp temp b}} a}]}}
+                                 {or false {+ 12 1}}}})
+      `{{fn {temp} {if temp temp {+ 12 1}}} false})
+(test (expand `{let-stx {nor = {[{nor a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                                 {or false {+ 12 1}}}})
+      `{{fn {temp} {if temp temp {+ 12 1}}} false})
+(test (expand `{let-stx {nor = {[{nor a b} => {{fn {temp} {if temp temp b}} a}]}}
+                        {let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
+                                 {or (nor false true) {+ 12 1}}}})
+      `{{fn {temp} {if temp temp {+ 12 1}}} {{fn {temp} {if temp temp true}} false}})
+(test (expand `{let-stx {rec = {[{rec a b} => {+ {rec a} {rec b}}]
                                 [{rec a} => {* 2 a}]}}
                         {let-stx {if-not-a = {[{if-not-a a b} => {if a b a}]}}
                                  {rec {if-not-a false 10} 12}}})
@@ -176,7 +232,7 @@
                   (fn-args (rest exprs)))]))
 
 ;; Gucci Lang Parser
-(define (parse [expr : s-expression]) : ExprC
+(define (parse-expr [expr : s-expression]) : ExprC
   (cond
     [(s-exp-match? `NUMBER expr) (val (num (s-exp->number expr)))]    
     [(s-exp-match? `SYMBOL expr)
@@ -229,6 +285,9 @@
         (appC (parse (first (s-exp->list expr)))
               (map (lambda (arg) (parse arg))
                    (rest (s-exp->list expr))))])]))
+
+(define (parse [exp : s-expression]) : ExprC
+  (parse-expr (expand exp)))
 
 ;; Test cases
 (test (parse `true) (val (bool true)))
