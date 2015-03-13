@@ -66,12 +66,84 @@
 ;; Expansion
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Expressions for let-stx
+(define-type pat-sexp
+  [pat-id (i : symbol)]
+  [pat-list (l : (listof pat-sexp))])
+(define-type sexp
+  [sexp-id (i : symbol)]
+  [sexp-num (n : number)]
+  [sexp-list (l : (listof sexp))])
+(define-type-alias stx (hashof string (type pat-sexp sexp)))
+(define empty-stx (hash (list)))
+
+;; Convert an s-expression into pat-sexp and sexp
+(define (string-append-list [l : (listof string)]) : string
+  (cond
+    [(empty? l) ""]
+    [else (string-append (first l) (string-append-list (rest l)))]))
+(define (pat-sexp->bitmap [pat : pat-sexp]) : string
+  (type-case pat-sexp pat
+    [pat-id (i) "_"]
+    [pat-list (l) (string-append (string-append "-"
+                                                (string-append-list 
+                                                 (map pat-sexp->bitmap l)))
+                                 "|")]))
+(define (s-exp->pat-sexp [exp : s-expression]) : string
+  (cond
+    [(s-exp-match? `SYMBOL exp) (pat-id (s-exp->symbol exp))]
+    [(s-exp-match? `{ANY ...} exp) (pat-list (map s-exp->pat-sexp (s-exp->list exp)))]
+    [else (error 'type "Could not convert s-expression to pat-sexp")]))
+(define (s-exp->sexp [exp : s-expression]) : sexp
+  (cond
+    [(s-exp-match? `SYMBOL exp) (sexp-id (s-exp->symbol exp))]
+    [(s-exp-match? `NUMBER exp) (sexp-num (s-exp->number exp))]
+    [(s-exp-match? `{ANY ...} exp) (sexp-list (map s-exp->sexp (s-exp->list exp)))]
+    #;[else (error 'type "Could not convert s-expression to sexp")]))
+;; Code coverage
+(test/exn (s-exp->pat-sexp `10) "Could not convert s-expression to pat-sexp")
+
+;; Substitute a stx s-expression given the environment hash
+;;()
+
 ;; Expand an s-expression using let-stx syntax
-(define (expand [expr : s-expression]) : s-expression
-  (local [(define exp-parts (s-exp->list expr))]
-    (cond 
-      [(equal? (first exp-parts) `let-stx)]
-      [else (list->s-exp (map expand exp-parts))])))
+(define (expand-rules [exprs : (listof s-expression)] [h : stx])
+  (cond
+    [(empty? exprs) h]
+    [else (local [(define parts (s-exp->list (first exprs)))]
+            (hash-set (expand-rules (rest exprs) h)
+                      (s-exp->pat-sexp (first parts))
+                      (s-exp->sexp (third parts))))]))
+(define (expand-stx [expr : s-expression] [env : (hashof symbol stx)]) : s-expression
+  (cond
+    ;; Is it a list?
+    [(s-exp-match? `{ANY ...} expr)
+     (local [(define exp-parts (s-exp->list expr)) (define (recur e) (expand-stx e env))]
+       (cond 
+         [(equal? (first exp-parts) `let-stx)
+          (cond
+            [(s-exp-match? `{let-stx {SYMBOL = {[ANY => ANY] ...}} ANY} expr)
+             (expand-stx (third exp-parts) 
+                         (hash-set env
+                                   (s-exp->symbol (first (s-exp->list (second exp-parts))))
+                                   (expand-rules (s-exp->list (third (s-exp->list (second exp-parts)))) 
+                                                 empty-stx)))]
+            [else (error 'expand "Syntax does not match EBNF spec")])]
+         ;; Check for substitutions
+         [(s-exp-match? `SYMBOL (first exp-parts))
+          (type-case (optionof stx) (hash-ref env (s-exp->symbol (first exp-parts)))
+            [some (s)
+                  (type-case (optionof sexp) (hash-ref s 
+                                                       (s-exp->pat-sexp 
+                                                        (list->s-exp
+                                                         (rest exp-parts))))
+                    ;;[some (exp) (substitute)]
+                    [none () expr])]
+            [none () expr])]
+         [else (list->s-exp (map recur exp-parts))]))]
+    [else expr]))
+(define (expand [expr : s-expression])
+  (expand-stx expr (hash (list))))
 
 ;; Test cases
 (test (expand `{let-stx {or = {[{or a b} => {{fn {temp} {if temp temp b}} a}]}}
@@ -273,6 +345,7 @@
 
 ;; Basic EBNF Tests
 (test-interp `(if (eq? (- 10 5) 5) 10 11) (num 10))
+(test-interp `(if (eq? (- 10 3) 5) 10 11) (num 11))
 (test-interp `(a*2b 10 3) (num 60))
 (test-interp `((fn (seven) (seven))
                ((fn (minus) (fn () (minus (+ 3 10) (* 2 3))))

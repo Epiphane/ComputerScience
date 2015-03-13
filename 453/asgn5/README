@@ -1,6 +1,17 @@
 Thomas Steinke (tsteinke@calpoly.edu)
 
-To run the program, run `make` or `make dine` in the terminal.
+To run the program, run `make` or `make all` in the terminal.
 
-Philosophers will default to eating once, but an optional command line
-argument changes how many times they want to eat.
+usage: minget [ -v ] [ -p num [ -s num ] ] imagefile srcpath [ dstpath ]
+Options:
+-p part    --- select partition for filesystem (default: none)
+-s sub     --- select subpartition for filesystem (default: none)
+-h help    --- print usage information and exit
+-v verbose --- increase verbosity level
+
+usage: minls [ -v ] [ -p num [ -s num ] ] imagefile [ path ]
+Options:
+-p part    --- select partition for filesystem (default: none)
+-s sub     --- select subpartition for filesystem (default: none)
+-h help    --- print usage information and exit
+-v verbose --- increase verbosity level
