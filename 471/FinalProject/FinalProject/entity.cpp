@@ -89,6 +89,16 @@ void Entity::addChild(Entity *e) {
     children.push_back(e);
 }
 
+void Entity::removeChild(Entity *e) {
+    std::vector<Entity *>::iterator iChild;
+    for (iChild = children.begin(); iChild < children.end(); iChild ++) {
+        if (*iChild == e) {
+            children.erase(iChild);
+            return;
+        }
+    }
+}
+
 void Entity::transformBefore(glm::mat4 mat) {
     Model *= mat;
 }

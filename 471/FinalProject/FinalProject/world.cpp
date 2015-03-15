@@ -21,10 +21,7 @@ World::World(const char *filename) : car(new CoasterCar()), track(new Track()), 
     camera_lookAt(glm::vec3(0, 0, 0));
     
     // Create initial track piece
-    float track_sc = 2.6f;
-    track->transformBefore(glm::scale(track_sc, track_sc, track_sc));
-    track->transformBefore(glm::translate(0.0f, -0.13f, 0.0f));
-    
+    track->transformBefore(glm::scale(2.0f, 2.0f, 2.0f));
     Track *track = this->track;
     Track *next;
     
@@ -64,10 +61,12 @@ World::World(const char *filename) : car(new CoasterCar()), track(new Track()), 
         track = next;
     }
     
-    CoasterCar *c = static_cast<CoasterCar *>(car);
-    c->setTrack(this->track);
-    c->addCar(new CoasterCar());
-    c->setWorld(this);
+    car->setStart(this->track);
+    car->addCar(new CoasterCar());
+    
+    float car_sc = 1.0f / 2.6f;
+    car->transformBefore(glm::scale(car_sc, car_sc, car_sc));
+    car->transformBefore(glm::translate(0.0f, 0.34f, -0.5f));
 }
 
 void World::render() {

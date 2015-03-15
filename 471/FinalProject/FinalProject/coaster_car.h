@@ -10,22 +10,18 @@
 #define __FinalProject__coaster_car__
 
 #include "entity.h"
-#include "world.h"
 #include "track.h"
 
 class CoasterCar : public Entity {
 private:
-    World *world;
-    
     CoasterCar *nextCar;
-    Track *track;
+    Track *track, *start;
     float dist;
 
 public:
     CoasterCar();
     
-    void setWorld(World *_world) { world = _world; }
-    void setTrack(Track *_track) { track = _track; dist = 0; }
+    void setStart(Track *_track);
     void addCar(CoasterCar *car);
     
     void update();

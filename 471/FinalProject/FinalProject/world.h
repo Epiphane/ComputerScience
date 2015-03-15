@@ -12,10 +12,11 @@
 #include <stdio.h>
 #include "entity.h"
 #include "track.h"
+#include "coaster_car.h"
 
 class World {
 private:
-    Entity *car;
+    CoasterCar *car;
     Track *track;
     Renderer *renderer;
     

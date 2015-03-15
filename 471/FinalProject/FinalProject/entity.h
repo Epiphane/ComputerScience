@@ -31,6 +31,10 @@ public:
     void load(const char *filename);
     
     void addChild(Entity *e);
+    void removeChild(Entity *e);
+    
+    glm::mat4 getModel() { return Model; }
+    
     void transformAfter(glm::mat4 mat);
     void transformBefore(glm::mat4 mat);
     void update();

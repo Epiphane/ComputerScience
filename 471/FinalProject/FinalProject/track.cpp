@@ -11,6 +11,7 @@
 #include <glm/ext.hpp>
 #include "track.h"
 #include "main.h"
+#include "bend.h"
 
 std::vector<tinyobj::shape_t> track_shapes;
 std::vector<tinyobj::material_t> track_materials;
@@ -89,26 +90,7 @@ Track::Track() : nextTrack(NULL), ModelBend(glm::translate(0, 0, 1)), changed(tr
 void Track::bend(glm::vec3 bend) {
     this->renderers[0]->bend = bend;
     
-    ModelBend = glm::mat4(1.0f);
-    if (bend.y) {
-        float inv = 1.0f / bend.y;
-        ModelBend *= glm::translate(-inv, 0.0f, 0.0f);
-        ModelBend *= glm::rotate(bend.y * RADIANS_TO_DEG, 0.0f, -1.0f, 0.0f);
-        ModelBend *= glm::translate(inv, 0.0f, 0.0f);
-    }
-    
-    if (bend.x) {
-        float inv = 1.0f / bend.x;
-        
-        ModelBend *= glm::translate(0.0f, inv, 0.0f);
-        ModelBend *= glm::rotate(bend.x * RADIANS_TO_DEG, -1.0f, 0.0f, 0.0f);
-        ModelBend *= glm::translate(0.0f, -inv, 0.0f);
-    }
-    
-    ModelBend *= glm::rotate(bend.z * RADIANS_TO_DEG, 0.0f, 0.0f, -1.0f);
-    
-    if (bend.x == 0 && bend.y == 0)
-        ModelBend *= glm::translate(0.0f, 0.0f, 1.0f);
+    ModelBend = compute_bend(bend, 1);
     
     changed = true;
 }
