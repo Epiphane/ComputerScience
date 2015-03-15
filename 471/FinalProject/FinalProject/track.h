@@ -14,14 +14,19 @@
 class Track : public Entity {
 private:
     Track *nextTrack;
+    bool changed;
+    glm::mat4 ModelBend;
     
 public:
     Track();
     
     void bend(glm::vec3 bend);
-    void setNext(Track *child);
+    glm::vec3 getBend() { return renderers[0]->bend; }
     
-    void endRender();
+    void setNext(Track *child);
+    Track *getNext() { return nextTrack; }
+    
+    void render();
 };
 
 #endif /* defined(__FinalProject__track__) */

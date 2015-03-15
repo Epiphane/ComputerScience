@@ -31,7 +31,8 @@ public:
     void load(const char *filename);
     
     void addChild(Entity *e);
-    void transform(glm::mat4 mat);
+    void transformAfter(glm::mat4 mat);
+    void transformBefore(glm::mat4 mat);
     void update();
     void render();
     

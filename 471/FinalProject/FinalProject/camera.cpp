@@ -48,6 +48,11 @@ void camera_moveYaw(double dy) {
     yaw += dy;
 }
 
+void camera_move(float dx, float dz) {
+    position += dz * glm::vec3(cos(yaw), 0, -sin(yaw));
+    position += dx * glm::cross(glm::vec3(cos(yaw), 0, -sin(yaw)), glm::vec3(0, 1, 0));//  glm::vec3(-sin(yaw), 0, cos(yaw));
+}
+
 glm::mat4 camera_getMatrix() {
     glm::vec3 dir = glm::vec3(cos(yaw) * cos(pitch), sin(pitch), -sin(yaw) * cos(pitch));
     

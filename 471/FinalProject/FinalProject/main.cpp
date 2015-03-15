@@ -34,7 +34,16 @@ const int w_width = 1024;
 const int w_height = 768;
 const char *w_title = "Roller Coaster Funtime";
 
+bool keysDown[GLFW_KEY_LAST] = {0};
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int modes) {
+    if (action == GLFW_PRESS)
+        keysDown[key] = 1;
+    if (action == GLFW_RELEASE)
+        keysDown[key] = 0;
+}
+
 #define CAMERA_SPEED 0.005
+#define CAMERA_MOVE 0.25
 int main(int argc, char **argv) {
     // Initialise GLFW
     if(!glfwInit()) {
@@ -67,6 +76,7 @@ int main(int argc, char **argv) {
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPos(window, w_width / 2, w_height / 2);
+    glfwSetKeyCallback(window, key_callback);
     
     glEnable (GL_BLEND);
     glEnable(GL_DEPTH_TEST);
@@ -76,7 +86,7 @@ int main(int argc, char **argv) {
     
     shaders_init();
     
-    world = new World("nothing.txt");
+    world = new World("tracks/track1.trk");
     
     double clock = glfwGetTime();
     do{
@@ -96,6 +106,18 @@ int main(int argc, char **argv) {
                 camera_moveYaw(dx * CAMERA_SPEED);
             }
             glfwSetCursorPos(window, w_width / 2, w_height / 2);
+            
+            // Update camera position
+            float cam_dx = 0, cam_dz = 0;
+            if (keysDown[GLFW_KEY_D])
+                cam_dx += CAMERA_MOVE;
+            if (keysDown[GLFW_KEY_A])
+                cam_dx -= CAMERA_MOVE;
+            if (keysDown[GLFW_KEY_W])
+                cam_dz += CAMERA_MOVE;
+            if (keysDown[GLFW_KEY_S])
+                cam_dz -= CAMERA_MOVE;
+            camera_move(cam_dx, cam_dz);
             
             // Update and render the game
             world->update();

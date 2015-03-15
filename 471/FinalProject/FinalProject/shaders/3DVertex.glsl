@@ -25,7 +25,7 @@ void main()
 {
     vec4 pos = aPosition, old_pos = aPosition;
     vec3 nor = aNormal, old_nor = aNormal;
-    if (uBend.z > 0.0) {
+    if (uBend.z != 0.0) {
         // Twist the track. The bigger the z value, the closer to uBend.z
         float theta = aPosition.z * uBend.z - M_PI / 2.0;
         
@@ -37,21 +37,7 @@ void main()
         old_pos = pos;
         old_nor = nor;
     }
-    if (uBend.x > 0.0) {
-        float radius = 1.0 / uBend.x - old_pos.y;
-        float theta = aPosition.z * uBend.x;
-        
-        pos.z = sin(theta) * radius;
-        pos.y = 1.0 / uBend.x - cos(theta) * radius;
-//        nor.z = sin(theta) * radius;
-        //        nor.y = 1.0 / uBend.x - cos(theta) * radius;
-        nor.y = cos(theta) * old_nor.y + sin(theta) * old_nor.z;
-        nor.z = -sin(theta) * old_nor.y + cos(theta) * old_nor.z;
-        
-        old_pos = pos;
-        old_nor = nor;
-    }
-    if (uBend.y > 0.0) {
+    if (uBend.y != 0.0) {
         // If we want z = [0, 1] to bend along theta = [0, uBend]
         // then the "track" must be a segment length 1 across a circle
         // So 2PIr * (uBend / 2PI) = uBend * r == 1
@@ -65,6 +51,21 @@ void main()
         pos.z = sin(theta) * radius;
         nor.x = cos(theta) * old_nor.x - sin(theta) * old_nor.z;
         nor.z = sin(theta) * old_nor.x + cos(theta) * old_nor.z;
+        
+        old_pos = pos;
+        old_nor = nor;
+    }
+    if (uBend.x != 0.0) {
+        float radius = 1.0 / uBend.x - old_pos.y;
+        float theta = aPosition.z * uBend.x;
+        
+        pos.z = sin(theta) * radius;
+        pos.y = 1.0 / uBend.x - cos(theta) * radius;
+        nor.y = cos(theta) * old_nor.y + sin(theta) * old_nor.z;
+        nor.z = -sin(theta) * old_nor.y + cos(theta) * old_nor.z;
+        
+        old_pos = pos;
+        old_nor = nor;
     }
     
     vWorldSpace = uViewMatrix * uModelMatrix * pos;

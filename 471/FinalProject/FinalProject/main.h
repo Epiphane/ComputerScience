@@ -14,6 +14,8 @@
 #include "tiny_obj_loader.h"
 
 #define MATH_PI 3.1415926535897932384626433832795
+#define RADIANS_TO_DEG float(180.0f / MATH_PI)
+#define DEG_TO_RADIANS float(MATH_PI / 180.0f)
 
 const extern int w_width;
 const extern int w_height;

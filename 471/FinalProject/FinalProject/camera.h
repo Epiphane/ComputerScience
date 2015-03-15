@@ -18,6 +18,7 @@ void camera_setPitch(double pitch);
 void camera_movePitch(double dp);
 void camera_setYaw(double yaw);
 void camera_moveYaw(double dy);
+void camera_move(float dx, float dz);
 
 glm::mat4 camera_getMatrix();
 

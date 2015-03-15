@@ -11,17 +11,20 @@
 
 #include <stdio.h>
 #include "entity.h"
+#include "track.h"
 
 class World {
 private:
-    Entity *coasterCar;
-    Entity *track;
+    Entity *car;
+    Track *track;
     Renderer *renderer;
     
     glm::vec2 cameraDir;
     
 public:
     World(const char *filename);
+    
+    Track *getTrack() { return track; }
     
     void update();
     void render();

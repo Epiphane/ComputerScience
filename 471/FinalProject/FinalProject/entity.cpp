@@ -89,8 +89,12 @@ void Entity::addChild(Entity *e) {
     children.push_back(e);
 }
 
-void Entity::transform(glm::mat4 mat) {
+void Entity::transformBefore(glm::mat4 mat) {
     Model *= mat;
+}
+
+void Entity::transformAfter(glm::mat4 mat) {
+    Model = mat * Model;
 }
 
 void Entity::update() {
