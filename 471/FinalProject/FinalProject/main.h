@@ -17,6 +17,9 @@
 #define RADIANS_TO_DEG float(180.0f / MATH_PI)
 #define DEG_TO_RADIANS float(MATH_PI / 180.0f)
 
+#define NUM_CARS 3
+#define TRACK "tracks/track1.trk"
+
 const extern int w_width;
 const extern int w_height;
 

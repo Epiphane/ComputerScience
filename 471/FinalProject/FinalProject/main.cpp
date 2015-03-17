@@ -27,20 +27,30 @@ using namespace std;
 #define FRAMES_PER_SEC 60
 #define SEC_PER_FRAME 1 / FRAMES_PER_SEC
 
-World *world;
+World *world = NULL;
 GLFWwindow* window;
 
-const int w_width = 1024;
-const int w_height = 768;
+bool running = true;
+
+const int w_width = 1440;
+const int w_height = 900;
 const char *w_title = "Roller Coaster Funtime";
 
 bool keysDown[GLFW_KEY_LAST] = {0};
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int modes) {
-    if (action == GLFW_PRESS)
+    if (action == GLFW_PRESS) {
         keysDown[key] = 1;
+    
+        if (key == GLFW_KEY_SPACE && world != NULL)
+            world->switchCamera();
+        if (key == GLFW_KEY_ENTER)
+            running = !running;
+    }
     if (action == GLFW_RELEASE)
         keysDown[key] = 0;
 }
+
+int track_num = 0;
 
 #define CAMERA_SPEED 0.005
 #define CAMERA_MOVE 0.25
@@ -82,14 +92,25 @@ int main(int argc, char **argv) {
     glEnable(GL_DEPTH_TEST);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    glClearColor(0.6f, 0.6f, 0.8f, 1.0f);
+    glClearColor(0.30f, 0.5f, 0.78f, 1.0f);
     
     shaders_init();
     
-    world = new World("tracks/track1.trk");
+    world = new World(TRACK);
     
     double clock = glfwGetTime();
     do{
+        if (keysDown[GLFW_KEY_P]) {
+            track_num = (track_num + 1) % 3;
+            world->~World();
+            if (track_num == 0)
+                world = new World("tracks/track1.trk");
+            if (track_num == 1)
+                world = new World("tracks/track2.trk");
+            if (track_num == 2)
+                world = new World("tracks/track3.trk");
+        }
+        
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
@@ -108,19 +129,24 @@ int main(int argc, char **argv) {
             glfwSetCursorPos(window, w_width / 2, w_height / 2);
             
             // Update camera position
-            float cam_dx = 0, cam_dz = 0;
+            glm::vec3 cam_d(0, 0, 0);
             if (keysDown[GLFW_KEY_D])
-                cam_dx += CAMERA_MOVE;
+                cam_d.x += CAMERA_MOVE;
             if (keysDown[GLFW_KEY_A])
-                cam_dx -= CAMERA_MOVE;
+                cam_d.x -= CAMERA_MOVE;
             if (keysDown[GLFW_KEY_W])
-                cam_dz += CAMERA_MOVE;
+                cam_d.z += CAMERA_MOVE;
             if (keysDown[GLFW_KEY_S])
-                cam_dz -= CAMERA_MOVE;
-            camera_move(cam_dx, cam_dz);
+                cam_d.z -= CAMERA_MOVE;
+            if (keysDown[GLFW_KEY_E])
+                cam_d.y += CAMERA_MOVE;
+            if (keysDown[GLFW_KEY_Q])
+                cam_d.y -= CAMERA_MOVE;
+            camera_move(cam_d.x, cam_d.y, cam_d.z);
             
             // Update and render the game
-            world->update();
+            if (running)
+                world->update();
             
             clock = nextTime;
         }

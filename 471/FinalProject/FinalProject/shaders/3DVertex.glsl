@@ -29,10 +29,10 @@ void main()
         // Twist the track. The bigger the z value, the closer to uBend.z
         float theta = aPosition.z * uBend.z - M_PI / 2.0;
         
-        pos.y = cos(theta) * aPosition.x - sin(theta) * aPosition.y;
-        pos.x = sin(theta) * aPosition.x + cos(theta) * aPosition.y;
-        nor.y = cos(theta) * aNormal.x - sin(theta) * aNormal.y;
-        nor.x = sin(theta) * aNormal.x + cos(theta) * aNormal.y;
+        pos.y = cos(theta) * old_pos.x - sin(theta) * old_pos.y;
+        pos.x = sin(theta) * old_pos.x + cos(theta) * old_pos.y;
+        nor.y = cos(theta) * old_nor.x - sin(theta) * old_nor.y;
+        nor.x = sin(theta) * old_nor.x + cos(theta) * old_nor.y;
         
         old_pos = pos;
         old_nor = nor;
@@ -47,8 +47,10 @@ void main()
         // Position outside or inside the bend
         radius += aPosition.x;
         
+        // Compute the turn!
         pos.x = cos(theta) * radius - 1.0 / uBend.y;
         pos.z = sin(theta) * radius;
+
         nor.x = cos(theta) * old_nor.x - sin(theta) * old_nor.z;
         nor.z = sin(theta) * old_nor.x + cos(theta) * old_nor.z;
         
