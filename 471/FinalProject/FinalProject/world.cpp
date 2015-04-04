@@ -94,11 +94,11 @@ void World::switchCamera() {
 }
 
 void World::render() {
-    ground->render();
-    car->render();
+//    ground->render();
+//    car->render();
     
     track->render();
-    sky->render();
+//    sky->render();
 }
 
 void World::update() {

@@ -1,0 +1,109 @@
+<html>
+<head>
+   <title>Coaster Sim</title>
+
+   <!-- Latest compiled and minified CSS -->
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+   <!-- Optional theme -->
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+   <!-- Latest compiled and minified JavaScript -->
+   <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</head>
+<body>
+   <div class="container">
+      <h1>Coaster Sim!</h1>
+      <p>By Thomas Steinke</p>
+
+      <div class="col-xs-6">
+         <iframe width="100%" height="500" src="https://www.youtube.com/embed/rmrCVeZ603o" frameborder="0" allowfullscreen></iframe>
+
+         <hr />
+      
+         <div id="carousel-example-generic" class="carousel slide" data-ride="carousel" data-interval="3000">
+           <!-- Indicators -->
+           <ol class="carousel-indicators">
+             <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+             <li data-target="#carousel-example-generic" data-slide-to="1"></li>
+             <li data-target="#carousel-example-generic" data-slide-to="2"></li>
+             <li data-target="#carousel-example-generic" data-slide-to="3"></li>
+           </ol>
+
+           <!-- Wrapper for slides -->
+           <div class="carousel-inner" role="listbox">
+             <div class="item active">
+               <img src="sc1.jpg">
+             </div>
+             <div class="item">
+               <img src="sc2.jpg">
+             </div>
+             <div class="item">
+               <img src="sc3.jpg">
+             </div>
+             <div class="item">
+               <img src="sc4.jpg">
+             </div>
+           </div>
+
+           <!-- Controls -->
+           <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+             <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+             <span class="sr-only">Previous</span>
+           </a>
+           <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+             <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+             <span class="sr-only">Next</span>
+           </a>
+         </div>
+      </div>
+      <div class="col-xs-6">
+         <h5>My final project is a <h3>Roller Coaster Simulator</h3> that allows you to experience a roller coaster, in both the first- and third-person perspectives.</h5>
+
+         <hr />
+
+         <h2>Controls</h2>
+         <ul>
+            <li>Space - Switch perspective</li>
+            <li>Mouse - Look around</li>
+            <li>A/D - Strafe camera left and right</li>
+            <li>W/S - Move camera forwards and backwards</li>
+            <li>E/Q - Move canera vertically up and down</li>
+            <li>P - Change to a different course (3 total)</li>
+         </ul>
+
+         <hr />
+
+         <h2>Technical Stuff</h2>
+         <div class="col-xs-12">
+            <p>
+               This program uses <code>in-shader vertex transforms</code> to create any kind of track curvature, from z-twists to simple turns. By scaling the track model to fit within <code>0 &lt;= z &lt;= 1</code>, we can transform as follows:
+
+               <img src="curve1.jpg" />
+            </p>
+            <hr />
+            <p>
+               In addition, I use <code>Perlin noise (<a target="_blank" href="http://libnoise.sourceforge.net">libnoise</a>)</code> to add a realistic camera shake, to make the experience more believable.
+            </p>
+            <div class="col-xs-6">
+               Stable<br />
+               <img src="stable.gif" style="width: 100%" />
+            </div>
+            <div class="col-xs-6">
+               Shaky<br />
+               <img src="shaky.gif" style="width: 100%" />
+            </div>
+            <hr class="col-xs-12" />
+            <p>
+               To give the coaster a realistic pace, I use <code>kinetic and potential energy</code> calculations, as well as <code>friction</code> to maintain a physically realistic speed as the car progresses.
+            </p>
+            <hr />
+            <p>
+               Lastly, I use <code>hierarchical modeling</code> to make sure that the track transformations are fluid and that the cars sit nicely on the track. To avoid recomputing an entire (possibly 200-deep) matrix stack every frame, the transformations for a track piece are done once and then saved.
+            </p>
+         </div>
+      </div>
+   </div>
+</body>
+</html>
